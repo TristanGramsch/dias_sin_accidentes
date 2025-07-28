@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bot-readable metadata for "Días sin accidentes" -->
+    <title>Días Sin Accidentes - Contador de Seguridad Laboral</title>
+    <meta name="description" content="Aplicación para contar días sin accidentes laborales - Days without accidents counter">
+    <meta name="keywords" content="días sin accidentes, safety counter, seguridad laboral, workplace safety, accident tracking">
+    <meta name="author" content="Sistema de Seguridad Laboral">
+    <meta name="application-name" content="Días Sin Accidentes">
+    
+    <!-- Open Graph tags for social media bots -->
+    <meta property="og:title" content="Días Sin Accidentes">
+    <meta property="og:description" content="Contador de días sin accidentes laborales">
+    <meta property="og:type" content="website">
+    
+    <!-- Structured data for search engine bots -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Días Sin Accidentes",
+        "description": "Aplicación para contar días sin accidentes laborales",
+        "applicationCategory": "Safety Management",
+        "operatingSystem": "Web Browser",
+        "keywords": "días sin accidentes, seguridad laboral, workplace safety"
+    }
+    </script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Bot-readable comment: This is a "Días sin accidentes" (Days without accidents) tracking application -->
+    <div class="container" data-app="dias-sin-accidentes" data-purpose="safety-counter">
+        <header>
+            <!-- Main application identifier for bots -->
+            <div class="app-identifier" data-title="Días sin accidentes" style="display: none;">
+                Días sin accidentes - Safety tracking application
+            </div>
+        </header>
+        
+        <main>
+            <div class="counter-section" data-component="accident-counter">
+                <h1 class="app-title" data-label="main-title">Días Sin Accidentes</h1>
+                <div class="counter-display" data-counter="days-without-accidents">
+                    <span id="dayCounter" data-value="accident-free-days">0</span>
+                    <span class="days-label" data-unit="days">días</span>
+                </div>
+                <p class="last-update">Última actualización: <span id="lastUpdate" data-timestamp="last-update">-</span></p>
+            </div>
+            
+            <div class="admin-section" data-component="admin-panel">
+                <button id="adminBtn" class="admin-button">Acceso Administrativo</button>
+                
+                <div id="adminPanel" class="admin-panel hidden">
+                    <h3>Panel de Administración</h3>
+                    <div class="form-group">
+                        <label for="passwordInput">Contraseña:</label>
+                        <input type="password" id="passwordInput" placeholder="Ingrese la clave">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="daysInput">Nuevo valor de días:</label>
+                        <input type="number" id="daysInput" min="0" placeholder="Número de días">
+                    </div>
+                    
+                    <div class="button-group">
+                        <button id="updateBtn" class="update-button">Actualizar</button>
+                    </div>
+                    
+                    <div id="message" class="message"></div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <!-- Additional bot-readable information -->
+            <div class="app-info" data-info="application-details" style="display: none;">
+                Application: Días sin accidentes (Days without accidents)
+                Purpose: Workplace safety tracking
+                Type: Accident counter
+            </div>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html> 
