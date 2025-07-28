@@ -134,7 +134,7 @@ function toggleAdminPanel() {
 function openAdminPanel() {
     adminPanel.classList.remove('hidden');
     isAdminPanelOpen = true;
-    adminBtn.textContent = 'Cerrar Panel';
+    adminBtn.textContent = 'Cerrar panel';
     passwordInput.focus();
     clearMessage();
     
@@ -146,7 +146,7 @@ function openAdminPanel() {
 function closeAdminPanel() {
     adminPanel.classList.add('hidden');
     isAdminPanelOpen = false;
-    adminBtn.textContent = 'Acceso Administrativo';
+    adminBtn.textContent = 'Acceso privilegiado';
     clearMessage();
     
     // Limpiar campos
