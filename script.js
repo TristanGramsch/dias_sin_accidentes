@@ -1,7 +1,5 @@
 // Configuración
-const ADMIN_PASSWORD = 'jefecito';
-const STORAGE_KEY = 'diasSinAccidentes';
-const LAST_UPDATE_KEY = 'ultimaActualizacion';
+const ADMIN_PASSWORD = 'jefecito'; // This will be sent to server for validation
 
 // Elementos del DOM
 const dayCounter = document.getElementById('dayCounter');
@@ -11,7 +9,6 @@ const adminPanel = document.getElementById('adminPanel');
 const passwordInput = document.getElementById('passwordInput');
 const daysInput = document.getElementById('daysInput');
 const updateBtn = document.getElementById('updateBtn');
-
 const message = document.getElementById('message');
 
 // Estado de la aplicación
@@ -44,28 +41,74 @@ function clearMessage() {
     message.style.display = 'none';
 }
 
-// Funciones de almacenamiento
-function loadData() {
-    const savedDays = localStorage.getItem(STORAGE_KEY);
-    const savedDate = localStorage.getItem(LAST_UPDATE_KEY);
-    
-    if (savedDays !== null) {
-        currentDays = parseInt(savedDays, 10);
-    }
-    
-    updateDisplay();
-    
-    if (savedDate) {
-        lastUpdate.textContent = formatDate(new Date(savedDate));
-    } else {
-        lastUpdate.textContent = 'Nunca';
+// API Functions
+async function loadData() {
+    try {
+        const response = await fetch('/api/counter');
+        const result = await response.json();
+        
+        if (result.success) {
+            currentDays = result.data.diasSinAccidentes;
+            updateDisplay();
+            lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
+        } else {
+            showMessage('Error al cargar los datos', 'error');
+            console.error('Error loading data:', result.message);
+        }
+    } catch (error) {
+        showMessage('Error de conexión al servidor', 'error');
+        console.error('Network error:', error);
+        
+        // Fallback to display 0 if server is not available
+        currentDays = 0;
+        updateDisplay();
+        lastUpdate.textContent = 'Error de conexión';
     }
 }
 
-function saveData() {
-    localStorage.setItem(STORAGE_KEY, currentDays.toString());
-    localStorage.setItem(LAST_UPDATE_KEY, new Date().toISOString());
-    lastUpdate.textContent = formatDate(new Date());
+async function updateDaysOnServer(password, days) {
+    try {
+        const response = await fetch('/api/counter/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                password: password,
+                dias: days
+            })
+        });
+        
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        return {
+            success: false,
+            message: 'Error de conexión al servidor'
+        };
+    }
+}
+
+async function resetCounterOnServer(password) {
+    try {
+        const response = await fetch('/api/counter/reset', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                password: password
+            })
+        });
+        
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        return {
+            success: false,
+            message: 'Error de conexión al servidor'
+        };
+    }
 }
 
 // Función para actualizar la visualización
@@ -88,19 +131,13 @@ function validatePassword() {
         return false;
     }
     
-    if (enteredPassword !== ADMIN_PASSWORD) {
-        showMessage('Contraseña incorrecta', 'error');
-        passwordInput.value = '';
-        passwordInput.focus();
-        return false;
-    }
-    
-    return true;
+    return enteredPassword;
 }
 
 // Función para actualizar días
-function updateDays() {
-    if (!validatePassword()) {
+async function updateDays() {
+    const password = validatePassword();
+    if (!password) {
         return;
     }
     
@@ -111,16 +148,58 @@ function updateDays() {
         return;
     }
     
-    const oldDays = currentDays;
-    currentDays = newDays;
-    updateDisplay();
-    saveData();
+    // Show loading state
+    updateBtn.textContent = 'Actualizando...';
+    updateBtn.disabled = true;
     
-    showMessage(`Días actualizados de ${oldDays} a ${currentDays}`, 'success');
-    closeAdminPanel();
+    const result = await updateDaysOnServer(password, newDays);
+    
+    // Reset button state
+    updateBtn.textContent = 'Actualizar';
+    updateBtn.disabled = false;
+    
+    if (result.success) {
+        currentDays = result.data.diasSinAccidentes;
+        updateDisplay();
+        lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
+        showMessage(result.message, 'success');
+        closeAdminPanel();
+    } else {
+        showMessage(result.message, 'error');
+        if (result.message.includes('Contraseña')) {
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+    }
 }
 
-
+// Función para resetear contador
+async function resetCounter() {
+    const password = validatePassword();
+    if (!password) {
+        return;
+    }
+    
+    if (!confirm('¿Está seguro de que desea reiniciar el contador a 0?')) {
+        return;
+    }
+    
+    const result = await resetCounterOnServer(password);
+    
+    if (result.success) {
+        currentDays = result.data.diasSinAccidentes;
+        updateDisplay();
+        lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
+        showMessage(result.message, 'success');
+        closeAdminPanel();
+    } else {
+        showMessage(result.message, 'error');
+        if (result.message.includes('Contraseña')) {
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+    }
+}
 
 // Función para abrir/cerrar panel de administración
 function toggleAdminPanel() {
@@ -146,7 +225,7 @@ function openAdminPanel() {
 function closeAdminPanel() {
     adminPanel.classList.add('hidden');
     isAdminPanelOpen = false;
-    adminBtn.textContent = 'Acceso privilegiado';
+    adminBtn.textContent = 'Acceso Administrativo';
     clearMessage();
     
     // Limpiar campos
@@ -156,7 +235,6 @@ function closeAdminPanel() {
 
 // Event listeners
 adminBtn.addEventListener('click', toggleAdminPanel);
-
 updateBtn.addEventListener('click', updateDays);
 
 // Permitir usar Enter en los campos de entrada
@@ -176,24 +254,8 @@ daysInput.addEventListener('keypress', (e) => {
     }
 });
 
-// Funcionalidad adicional: incrementar automáticamente cada día
-function checkDailyIncrement() {
-    const lastIncrementDate = localStorage.getItem('ultimoIncremento');
-    const today = new Date().toDateString();
-    
-    if (lastIncrementDate !== today) {
-        // Solo incrementar si no es el primer día (evitar incrementar cuando se carga por primera vez)
-        if (lastIncrementDate !== null) {
-            currentDays++;
-            updateDisplay();
-            saveData();
-        }
-        localStorage.setItem('ultimoIncremento', today);
-    }
-}
-
 // Función para mostrar estadísticas adicionales
-function showStats() {
+async function showStats() {
     if (currentDays > 0) {
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - currentDays);
@@ -202,73 +264,128 @@ function showStats() {
 - Días sin accidentes: ${currentDays}
 - Fecha de inicio del período actual: ${formatDate(startDate)}
 - Última actualización: ${lastUpdate.textContent}`);
+    } else {
+        console.log('No hay estadísticas disponibles (contador en 0)');
     }
+}
+
+// Funciones de exportación/importación actualizadas para usar API
+async function exportData() {
+    try {
+        const response = await fetch('/api/export');
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'dias_sin_accidentes_backup.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showMessage('Datos exportados correctamente', 'success');
+        } else {
+            showMessage('Error al exportar datos', 'error');
+        }
+    } catch (error) {
+        showMessage('Error de conexión al servidor', 'error');
+        console.error('Export error:', error);
+    }
+}
+
+async function importData(jsonData) {
+    const password = prompt('Ingrese la contraseña de administrador:');
+    if (!password) {
+        showMessage('Importación cancelada', 'error');
+        return;
+    }
+    
+    try {
+        const data = JSON.parse(jsonData);
+        
+        const response = await fetch('/api/import', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                password: password,
+                data: data
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            currentDays = result.data.diasSinAccidentes;
+            updateDisplay();
+            lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
+            showMessage(result.message, 'success');
+            
+            // Reload data to ensure everything is in sync
+            setTimeout(() => {
+                loadData();
+            }, 1000);
+        } else {
+            showMessage(result.message, 'error');
+        }
+        
+    } catch (error) {
+        showMessage('Error al importar datos: formato inválido', 'error');
+        console.error('Import error:', error);
+    }
+}
+
+// Add file import functionality
+function createFileImportInput() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                importData(e.target.result);
+            };
+            reader.readAsText(file);
+        }
+    };
+    return input;
+}
+
+function importFromFile() {
+    const input = createFileImportInput();
+    input.click();
 }
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
-    checkDailyIncrement();
     
     // Agregar efecto de transición suave al contador
     dayCounter.style.transition = 'transform 0.2s ease';
     
     // Mensaje de bienvenida en consola
-    console.log('Sistema de Días Sin Accidentes iniciado');
+    console.log('Sistema de Días Sin Accidentes iniciado (Node.js version)');
     console.log('Tip: Escriba showStats() en la consola para ver estadísticas');
+    console.log('Tip: Escriba exportData() para exportar datos');
+    console.log('Tip: Escriba importFromFile() para importar datos desde archivo');
     
-    // Hacer showStats disponible globalmente
+    // Hacer funciones disponibles globalmente
     window.showStats = showStats;
+    window.exportData = exportData;
+    window.importFromFile = importFromFile;
+    window.importData = importData;
+    
+    // Auto-refresh data every 5 minutes to check for daily increments
+    setInterval(loadData, 5 * 60 * 1000);
 });
 
-// Funciones de respaldo para casos especiales
-function exportData() {
-    const data = {
-        diasSinAccidentes: currentDays,
-        ultimaActualizacion: localStorage.getItem(LAST_UPDATE_KEY),
-        ultimoIncremento: localStorage.getItem('ultimoIncremento')
-    };
-    
-    const dataStr = JSON.stringify(data, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'dias_sin_accidentes_backup.json';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    showMessage('Datos exportados correctamente', 'success');
-}
-
-function importData(jsonData) {
-    try {
-        const data = JSON.parse(jsonData);
-        
-        if (data.diasSinAccidentes !== undefined) {
-            currentDays = parseInt(data.diasSinAccidentes, 10);
-            updateDisplay();
-        }
-        
-        if (data.ultimaActualizacion) {
-            localStorage.setItem(LAST_UPDATE_KEY, data.ultimaActualizacion);
-        }
-        
-        if (data.ultimoIncremento) {
-            localStorage.setItem('ultimoIncremento', data.ultimoIncremento);
-        }
-        
-        saveData();
-        showMessage('Datos importados correctamente', 'success');
-        
-    } catch (error) {
-        showMessage('Error al importar datos: formato inválido', 'error');
+// Handle page visibility change to refresh data when user returns
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        loadData();
     }
-}
-
-// Hacer funciones de exportación/importación disponibles globalmente
-window.exportData = exportData;
-window.importData = importData; 
+}); 
