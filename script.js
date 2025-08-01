@@ -368,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dayCounter.style.transition = 'transform 0.2s ease';
     
     // Mensaje de bienvenida en consola
-    console.log('Sistema de Días Sin Accidentes iniciado (Node.js version)');
+    console.log('Sistema de Días sin accidentes iniciado (Node.js version)');
     console.log('Tip: Escriba showStats() en la consola para ver estadísticas');
     console.log('Tip: Escriba exportData() para exportar datos');
     console.log('Tip: Escriba importFromFile() para importar datos desde archivo');

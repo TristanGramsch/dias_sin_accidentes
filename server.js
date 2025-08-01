@@ -287,7 +287,7 @@ app.get('/', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`🚀 Días Sin Accidentes server running on http://localhost:${PORT}`);
+    console.log(`🚀 Días sin accidentes server running on http://localhost:${PORT}`);
     console.log(`📊 Data file: ${DATA_FILE}`);
     
     // Initialize daily increment check

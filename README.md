@@ -1,4 +1,4 @@
-# Días Sin Accidentes - Node.js Application
+# Días sin accidentes - Node.js Application
 
 A Node.js application to track days without workplace incidents with persistent data storage and admin controls.
 
