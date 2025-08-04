@@ -286,8 +286,10 @@ app.get('/', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`🚀 Días sin accidentes server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Días sin accidentes server running on http://0.0.0.0:${PORT}`);
+    console.log(`📊 Local access: http://localhost:${PORT}`);
+    console.log(`🌐 Network access: http://192.168.0.100:${PORT}`);
     console.log(`📊 Data file: ${DATA_FILE}`);
     
     // Initialize daily increment check
