@@ -1,6 +1,9 @@
 # Use official Node.js LTS image
 FROM node:18-alpine
 
+# Install curl for DDNS updates
+RUN apk add --no-cache curl
+
 # Set working directory
 WORKDIR /app
 
@@ -19,4 +22,7 @@ EXPOSE 3000
 # USER node
 
 # Start the app
-CMD ["npm", "start"] 
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+# ENTRYPOINT replaces CMD
+ENTRYPOINT ["/entrypoint.sh"] 
