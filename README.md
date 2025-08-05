@@ -11,8 +11,27 @@ A Node.js application to track days without workplace incidents with persistent 
 - 📊 **Export/Import**: Backup and restore functionality
 - 🌐 **Web Interface**: Clean, responsive web interface
 - ⚡ **Real-time Updates**: Auto-refresh functionality
+- 🐳 **Docker Ready**: Containerized deployment with DDNS support
 
 ## Installation
+
+### Docker Deployment (Recommended for Pi)
+
+1. **Build and run with Docker**:
+   ```bash
+   # Build the Docker image
+   docker build -t dias-sin-accidentes .
+   
+   # Run the container (port 443)
+   docker run -d --name dias-counter -p 443:443 --restart unless-stopped dias-sin-accidentes
+   ```
+
+2. **Access the application**:
+   - **Local**: `http://localhost:443`
+   - **Network**: `http://192.168.0.3:443` (or your Pi's IP)
+   - **External**: `http://yourdomain.com:443` (via DDNS)
+
+### Manual Installation
 
 1. **Install Node.js** (version 14 or higher)
    - Download from [nodejs.org](https://nodejs.org/)
@@ -27,30 +46,59 @@ A Node.js application to track days without workplace incidents with persistent 
 ### Starting the Server
 
 ```bash
-# Production mode
+# Production mode (port 443)
 npm start
 
 # Development mode (with auto-restart)
 npm run dev
+
+# Custom port
+PORT=8080 npm start
 ```
 
-The application will be available at: **http://localhost:3000**
+The application will be available at: **http://localhost:443**
 
 ### Default Configuration
 
 - **Admin Password**: `jefecito`
-- **Port**: 3000 (configurable via PORT environment variable)
+- **Port**: 443 (configurable via PORT environment variable)
 - **Data File**: `data.json` (automatically created)
+- **DDNS**: Auto-updates on container start
 
 ### Environment Variables
 
 ```bash
 # Custom port
-PORT=3000 npm start
+PORT=443 npm start
 
 # Or set permanently
-export PORT=3000
+export PORT=443
 npm start
+```
+
+## Docker Commands
+
+```bash
+# Build image
+docker build -t dias-sin-accidentes .
+
+# Run container with port mapping
+docker run -d --name dias-counter -p 443:443 --restart unless-stopped dias-sin-accidentes
+
+# View logs
+docker logs dias-counter
+
+# Stop container
+docker stop dias-counter
+
+# Restart container
+docker restart dias-counter
+
+# Update container
+docker stop dias-counter
+docker rm dias-counter
+docker build -t dias-sin-accidentes .
+docker run -d --name dias-counter -p 443:443 --restart unless-stopped dias-sin-accidentes
 ```
 
 ## API Endpoints
@@ -122,6 +170,7 @@ The application stores data in `data.json`:
 - CORS enabled for web interface
 - Input validation on all endpoints
 - No sensitive data logged
+- Docker container runs with standard security
 
 ## Development
 
@@ -134,6 +183,8 @@ dias_sin_accidentes/
 ├── index.html         # Frontend interface
 ├── script.js          # Frontend JavaScript
 ├── styles.css         # Styling
+├── Dockerfile         # Docker configuration
+├── entrypoint.sh      # Docker startup script
 ├── data.json          # Data storage (auto-generated)
 └── README.md          # This file
 ```
@@ -148,30 +199,33 @@ dias_sin_accidentes/
 
 - The `data.json` file contains all application data
 - Use the export feature for manual backups
+- Docker volumes can be used for persistent storage
 - Consider implementing automatic backups for production
 
 ## Troubleshooting
 
 ### Common Issues
 
-**Server won't start:**
-- Check if Node.js is installed: `node --version`
-- Install dependencies: `npm install`
-- Check if port is available: `netstat -an | grep 3000`
+**Container won't start:**
+- Check if port 443 is available: `sudo netstat -tlnp | grep :443`
+- Ensure Docker is running: `sudo systemctl status docker`
+- Check container logs: `docker logs dias-counter`
+
+**Can't access externally:**
+- Verify port forwarding/DMZ on router points to Pi IP
+- Check firewall settings: `sudo ufw status`
+- Ensure DDNS is updating correctly
 
 **Data not persisting:**
-- Check file permissions for `data.json`
-- Ensure server has write access to directory
-
-**Can't update counter:**
-- Verify admin password is correct
-- Check browser console for error messages
-- Ensure server is running
+- Use Docker volumes for persistent storage
+- Check container file permissions
+- Ensure server has write access to data directory
 
 ### Logs
 
-Server logs include:
+Docker container logs include:
 - Startup information
+- DDNS update status
 - Daily increment checks
 - Error messages
 - API request information
@@ -181,34 +235,42 @@ Server logs include:
 If migrating from the localStorage version:
 
 1. Export data from browser version (if available)
-2. Start Node.js server
+2. Start Docker container
 3. Use import functionality to restore data
-4. Update any bookmarks to point to `http://localhost:3000`
+4. Update any bookmarks to point to new address
 
 ## Production Deployment
 
-For production deployment:
+For production deployment on Raspberry Pi:
 
-1. **Use Process Manager**:
+1. **Docker Deployment** (Recommended):
    ```bash
-   npm install -g pm2
-   pm2 start server.js --name "dias-sin-accidentes"
+   # Run with restart policy
+   docker run -d --name dias-counter -p 443:443 --restart unless-stopped dias-sin-accidentes
    ```
 
 2. **Reverse Proxy** (nginx example):
    ```nginx
-   location / {
-       proxy_pass http://localhost:3000;
-       proxy_set_header Host $host;
-       proxy_set_header X-Real-IP $remote_addr;
+   server {
+       listen 80;
+       server_name yourdomain.com;
+       location / {
+           proxy_pass http://localhost:443;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+       }
    }
    ```
 
 3. **Environment Configuration**:
    ```bash
    export NODE_ENV=production
-   export PORT=3000
+   export PORT=443
    ```
+
+## DDNS Integration
+
+The container automatically updates your DDNS record on startup via the cPanel webcall URL configured in `entrypoint.sh`. This ensures your domain always points to your current public IP address.
 
 ## License
 
@@ -218,5 +280,5 @@ MIT License - See package.json for details.
 
 For issues or questions:
 1. Check this README
-2. Review server logs
+2. Review Docker logs: `docker logs dias-counter`
 3. Check browser console for frontend errors 

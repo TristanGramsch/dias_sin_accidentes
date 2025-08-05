@@ -14,8 +14,8 @@ RUN npm ci --only=production
 # Copy app source
 COPY . .
 
-# Expose port
-EXPOSE 3000
+# Expose port 443 (HTTPS port)
+EXPOSE 443
 
 # TODO 
 # Use non-root user for security, for now unnecesary
