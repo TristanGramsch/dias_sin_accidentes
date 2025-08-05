@@ -3,6 +3,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const fs = require('fs').promises;
 const path = require('path');
+const https = require('https');
+const fsSync = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 443;
@@ -285,20 +287,38 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Start server
-app.listen(PORT, '0.0.0.0', () => {
+// ===== Start server (HTTPS preferred) =====
+const CERT_PATH = path.join(__dirname, 'cert.pem');
+const KEY_PATH  = path.join(__dirname, 'key.pem');
+const CA_PATH   = path.join(__dirname, 'ca.pem');
+
+let serverCallback = () => {
     console.log(`🚀 Días sin accidentes server running on http://0.0.0.0:${PORT}`);
     console.log(`📊 Local access: http://localhost:${PORT}`);
     console.log(`🌐 Network access: http://192.168.0.3:${PORT}`);
     console.log(`📊 Data file: ${DATA_FILE}`);
-    
+
     // Initialize daily increment check
     checkDailyIncrement().then(() => {
         console.log('✅ Daily increment check completed');
     }).catch((error) => {
         console.error('❌ Error in daily increment check:', error);
     });
-});
+};
+
+if (fsSync.existsSync(CERT_PATH) && fsSync.existsSync(KEY_PATH)) {
+    const options = {
+        cert: fsSync.readFileSync(CERT_PATH),
+        key:  fsSync.readFileSync(KEY_PATH),
+        ca:   fsSync.existsSync(CA_PATH) ? fsSync.readFileSync(CA_PATH) : undefined
+    };
+
+    https.createServer(options, app).listen(PORT, '0.0.0.0', serverCallback);
+    console.log('🔒 HTTPS enabled with provided certificate.');
+} else {
+    app.listen(PORT, '0.0.0.0', serverCallback);
+    console.warn('⚠️  Certificate files not found. Falling back to HTTP.');
+}
 
 // Handle graceful shutdown
 process.on('SIGINT', () => {

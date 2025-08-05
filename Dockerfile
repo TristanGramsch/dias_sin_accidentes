@@ -17,10 +17,6 @@ COPY . .
 # Expose port 443 (HTTPS port)
 EXPOSE 443
 
-# TODO 
-# Use non-root user for security, for now unnecesary
-# USER node
-
 # Start the app
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
