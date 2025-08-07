@@ -12,6 +12,7 @@ const DATA_FILE = path.join(__dirname, 'data.json');
 
 // Configuration
 const ADMIN_PASSWORD = 'jefecito';
+const TIME_ZONE = 'America/Santiago'; // Chilean Time (CLT)
 
 // Middleware
 app.use(cors());
@@ -21,6 +22,7 @@ app.use(express.static('./')); // Serve static files from current directory
 // Utility functions
 function formatDate(date) {
     return new Intl.DateTimeFormat('es-ES', {
+        timeZone: TIME_ZONE,
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -205,82 +207,9 @@ app.post('/api/counter/reset', async (req, res) => {
     }
 });
 
-// Export data
-app.get('/api/export', async (req, res) => {
-    try {
-        const data = await loadData();
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Content-Disposition', 'attachment; filename=dias_sin_accidentes_backup.json');
-        res.send(JSON.stringify(data, null, 2));
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error exporting data',
-            error: error.message
-        });
-    }
-});
-
-// Import data (admin only)
-app.post('/api/import', async (req, res) => {
-    try {
-        const { password, data: importData } = req.body;
-        
-        // Validate password
-        if (!password || password !== ADMIN_PASSWORD) {
-            return res.status(401).json({
-                success: false,
-                message: 'Contraseña incorrecta'
-            });
-        }
-        
-        // Validate and process import data
-        if (!importData || typeof importData !== 'object') {
-            return res.status(400).json({
-                success: false,
-                message: 'Datos de importación inválidos'
-            });
-        }
-        
-        const currentData = await loadData();
-        
-        // Update with imported data
-        if (importData.diasSinAccidentes !== undefined) {
-            currentData.diasSinAccidentes = parseInt(importData.diasSinAccidentes, 10);
-        }
-        if (importData.ultimaActualizacion) {
-            currentData.ultimaActualizacion = importData.ultimaActualizacion;
-        }
-        if (importData.ultimoIncremento) {
-            currentData.ultimoIncremento = importData.ultimoIncremento;
-        }
-        
-        const success = await saveData(currentData);
-        
-        if (success) {
-            res.json({
-                success: true,
-                message: 'Datos importados correctamente',
-                data: {
-                    diasSinAccidentes: currentData.diasSinAccidentes,
-                    ultimaActualizacion: currentData.ultimaActualizacion,
-                    ultimaActualizacionFormatted: formatDate(new Date(currentData.ultimaActualizacion))
-                }
-            });
-        } else {
-            res.status(500).json({
-                success: false,
-                message: 'Error al guardar los datos importados'
-            });
-        }
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error importing data',
-            error: error.message
-        });
-    }
-});
+/* ===== Export / Import endpoints deprecated =====
+   Route implementations have been removed to simplify the API surface.
+   Refer to git history if you need the original code. */
 
 // Serve the main page
 app.get('/', (req, res) => {
@@ -288,9 +217,11 @@ app.get('/', (req, res) => {
 });
 
 // ===== Start server (HTTPS preferred) =====
-const CERT_PATH = path.join(__dirname, 'cert.pem');
-const KEY_PATH  = path.join(__dirname, 'key.pem');
-const CA_PATH   = path.join(__dirname, 'ca.pem');
+
+// Allow overriding certificate paths via environment variables for flexible dev/prod setups
+const CERT_PATH = process.env.CERT_PATH || path.join(__dirname, 'cert.pem');
+const KEY_PATH  = process.env.KEY_PATH  || path.join(__dirname, 'key.pem');
+const CA_PATH   = process.env.CA_PATH   || path.join(__dirname, 'ca.pem');
 
 let serverCallback = () => {
     console.log(`🚀 Días sin accidentes server running on http://0.0.0.0:${PORT}`);

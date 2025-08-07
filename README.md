@@ -1,284 +1,80 @@
-# Días sin accidentes - Node.js Application
+# Días sin Accidentes (CLT Edition)
 
-A Node.js application to track days without workplace incidents with persistent data storage and admin controls.
+Pequeña aplicación Node.js + Express que cuenta los días sin accidentes, usando la zona horaria de Chile (CLT / America-Santiago) para todos los cálculos y visualizaciones.
 
-## Features
+## Características
 
-- 🏭 **Days Counter**: Real-time counter of days without incidents
-- 🔐 **Admin Panel**: Password-protected administration interface
-- 📈 **Auto-increment**: Automatically increments daily counter
-- 💾 **Persistent Storage**: File-based data storage (JSON)
-- 📊 **Export/Import**: Backup and restore functionality
-- 🌐 **Web Interface**: Clean, responsive web interface
-- ⚡ **Real-time Updates**: Auto-refresh functionality
-- 🐳 **Docker Ready**: Containerized deployment with DDNS support
+- Contador en vivo que se incrementa cada medianoche (CLT)
+- Panel de administración protegido por contraseña para actualizar o reiniciar el contador
+- Interfaz web responsive
+- Soporte HTTPS mediante certificados `.pem` (rutas configurables)
+- Lista para Docker (Raspberry Pi u otros hosts Linux)
 
-## Installation
-
-### Docker Deployment (Recommended for Pi)
-
-1. **Build and run with Docker**:
-   ```bash
-   # Build the Docker image
-   docker build -t dias-sin-accidentes .
-   
-   # Run the container (port 443)
-   docker run -d --name dias-counter -p 443:443 --restart unless-stopped dias-sin-accidentes
-   ```
-
-2. **Access the application**:
-   - **Local**: `http://localhost:443`
-   - **Network**: `http://192.168.0.3:443` (or your Pi's IP)
-   - **External**: `http://yourdomain.com:443` (via DDNS)
-
-### Manual Installation
-
-1. **Install Node.js** (version 14 or higher)
-   - Download from [nodejs.org](https://nodejs.org/)
-
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
-
-## Usage
-
-### Starting the Server
+## Inicio rápido (Desarrollo)
 
 ```bash
-# Production mode (port 443)
-npm start
+# Clonar y cambiar a la rama de desarrollo
+git clone <repo-url>
+cd dias_sin_accidentes
+git checkout development
 
-# Development mode (with auto-restart)
-npm run dev
+# Instalar dependencias
+npm install
 
-# Custom port
-PORT=8080 npm start
+# Ejecutar en modo desarrollo (HTTP si no hay certs)
+PORT=443 node server.js
 ```
 
-The application will be available at: **http://localhost:443**
+### Usar certificados de cPanel localmente
 
-### Default Configuration
-
-- **Admin Password**: `jefecito`
-- **Port**: 443 (configurable via PORT environment variable)
-- **Data File**: `data.json` (automatically created)
-- **DDNS**: Auto-updates on container start
-
-### Environment Variables
+1. Exporta `cert.pem` y `key.pem` desde cPanel
+2. Colócalos en la raíz del proyecto **o** define las variables de entorno:
 
 ```bash
-# Custom port
-PORT=443 npm start
-
-# Or set permanently
-export PORT=443
-npm start
+CERT_PATH=/ruta/cert.pem \
+KEY_PATH=/ruta/key.pem \
+node server.js
 ```
 
-## Docker Commands
+Si los archivos no existen el servidor se inicia en HTTP, permitiendo desarrollo sin HTTPS.
+
+## Producción con Docker
 
 ```bash
-# Build image
 docker build -t dias-sin-accidentes .
 
-# Run container with port mapping
-docker run -d --name dias-counter -p 443:443 --restart unless-stopped dias-sin-accidentes
-
-# View logs
-docker logs dias-counter
-
-# Stop container
-docker stop dias-counter
-
-# Restart container
-docker restart dias-counter
-
-# Update container
-docker stop dias-counter
-docker rm dias-counter
-docker build -t dias-sin-accidentes .
-docker run -d --name dias-counter -p 443:443 --restart unless-stopped dias-sin-accidentes
+docker run -d --name dias-counter \
+  -p 443:443 \
+  -e PORT=443 \
+  -v /ruta/cert.pem:/app/cert.pem \
+  -v /ruta/key.pem:/app/key.pem \
+  --restart unless-stopped \
+  dias-sin-accidentes
 ```
 
-## API Endpoints
+## API REST
 
-The application provides a REST API:
+| Método | Endpoint              | Descripción                          |
+|--------|-----------------------|--------------------------------------|
+| GET    | /api/counter          | Obtiene el contador y timestamps     |
+| POST   | /api/counter/update   | Actualiza los días (solo admin)      |
+| POST   | /api/counter/reset    | Reinicia a 0 (solo admin)            |
 
-- `GET /api/counter` - Get current counter data
-- `POST /api/counter/update` - Update counter (requires admin password)
-- `POST /api/counter/reset` - Reset counter to 0 (requires admin password)
-- `GET /api/export` - Export data as JSON
-- `POST /api/import` - Import data from JSON (requires admin password)
-
-### API Example
-
-```javascript
-// Get current counter
-fetch('/api/counter')
-  .then(response => response.json())
-  .then(data => console.log(data));
-
-// Update counter (admin)
-fetch('/api/counter/update', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    password: 'jefecito',
-    dias: 100
-  })
-});
-```
-
-## Web Interface
-
-### Public Features
-- View current days without incidents
-- See last update timestamp
-- Responsive design for mobile/desktop
-
-### Admin Features (Password Protected)
-- Update counter manually
-- Reset counter to zero
-- Export/import data functionality
-
-### Console Commands
-
-Open browser console for additional features:
-
-```javascript
-showStats()        // Display detailed statistics
-exportData()       // Download backup file
-importFromFile()   // Import from JSON file
-```
-
-## Data Structure
-
-The application stores data in `data.json`:
+Cuerpo para rutas protegidas:
 
 ```json
 {
-  "diasSinAccidentes": 42,
-  "ultimaActualizacion": "2024-01-15T10:30:00.000Z",
-  "ultimoIncremento": "Mon Jan 15 2024"
+  "password": "jefecito",
+  "dias": 10        // solo para /update
 }
 ```
 
-## Security
+## Variables de entorno
 
-- Admin operations require password authentication
-- CORS enabled for web interface
-- Input validation on all endpoints
-- No sensitive data logged
-- Docker container runs with standard security
+- `PORT` – Puerto de escucha (por defecto 443)
+- `CERT_PATH` – Ruta personalizada al certificado
+- `KEY_PATH` – Ruta personalizada a la llave
+- `ADMIN_PASSWORD` – Sobrescribe la contraseña admin por defecto
 
-## Development
-
-### Project Structure
-
-```
-dias_sin_accidentes/
-├── server.js          # Main Node.js server
-├── package.json       # Dependencies and scripts
-├── index.html         # Frontend interface
-├── script.js          # Frontend JavaScript
-├── styles.css         # Styling
-├── Dockerfile         # Docker configuration
-├── entrypoint.sh      # Docker startup script
-├── data.json          # Data storage (auto-generated)
-└── README.md          # This file
-```
-
-### Adding Features
-
-1. **New API Endpoints**: Add routes in `server.js`
-2. **Frontend Changes**: Modify `script.js` and `index.html`
-3. **Styling**: Update `styles.css`
-
-### Backup Strategy
-
-- The `data.json` file contains all application data
-- Use the export feature for manual backups
-- Docker volumes can be used for persistent storage
-- Consider implementing automatic backups for production
-
-## Troubleshooting
-
-### Common Issues
-
-**Container won't start:**
-- Check if port 443 is available: `sudo netstat -tlnp | grep :443`
-- Ensure Docker is running: `sudo systemctl status docker`
-- Check container logs: `docker logs dias-counter`
-
-**Can't access externally:**
-- Verify port forwarding/DMZ on router points to Pi IP
-- Check firewall settings: `sudo ufw status`
-- Ensure DDNS is updating correctly
-
-**Data not persisting:**
-- Use Docker volumes for persistent storage
-- Check container file permissions
-- Ensure server has write access to data directory
-
-### Logs
-
-Docker container logs include:
-- Startup information
-- DDNS update status
-- Daily increment checks
-- Error messages
-- API request information
-
-## Migration from Browser Version
-
-If migrating from the localStorage version:
-
-1. Export data from browser version (if available)
-2. Start Docker container
-3. Use import functionality to restore data
-4. Update any bookmarks to point to new address
-
-## Production Deployment
-
-For production deployment on Raspberry Pi:
-
-1. **Docker Deployment** (Recommended):
-   ```bash
-   # Run with restart policy
-   docker run -d --name dias-counter -p 443:443 --restart unless-stopped dias-sin-accidentes
-   ```
-
-2. **Reverse Proxy** (nginx example):
-   ```nginx
-   server {
-       listen 80;
-       server_name yourdomain.com;
-       location / {
-           proxy_pass http://localhost:443;
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-       }
-   }
-   ```
-
-3. **Environment Configuration**:
-   ```bash
-   export NODE_ENV=production
-   export PORT=443
-   ```
-
-## DDNS Integration
-
-The container automatically updates your DDNS record on startup via the cPanel webcall URL configured in `entrypoint.sh`. This ensures your domain always points to your current public IP address.
-
-## License
-
-MIT License - See package.json for details.
-
-## Support
-
-For issues or questions:
-1. Check this README
-2. Review Docker logs: `docker logs dias-counter`
-3. Check browser console for frontend errors 
+## Licencia
+MIT 

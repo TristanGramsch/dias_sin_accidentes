@@ -18,6 +18,7 @@ let isAdminPanelOpen = false;
 // Funciones de utilidad
 function formatDate(date) {
     return new Intl.DateTimeFormat('es-ES', {
+        timeZone: 'America/Santiago',
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -269,96 +270,7 @@ async function showStats() {
     }
 }
 
-// Funciones de exportación/importación actualizadas para usar API
-async function exportData() {
-    try {
-        const response = await fetch('/api/export');
-        if (response.ok) {
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'dias_sin_accidentes_backup.json';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            
-            showMessage('Datos exportados correctamente', 'success');
-        } else {
-            showMessage('Error al exportar datos', 'error');
-        }
-    } catch (error) {
-        showMessage('Error de conexión al servidor', 'error');
-        console.error('Export error:', error);
-    }
-}
-
-async function importData(jsonData) {
-    const password = prompt('Ingrese la contraseña de administrador:');
-    if (!password) {
-        showMessage('Importación cancelada', 'error');
-        return;
-    }
-    
-    try {
-        const data = JSON.parse(jsonData);
-        
-        const response = await fetch('/api/import', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                password: password,
-                data: data
-            })
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            currentDays = result.data.diasSinAccidentes;
-            updateDisplay();
-            lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
-            showMessage(result.message, 'success');
-            
-            // Reload data to ensure everything is in sync
-            setTimeout(() => {
-                loadData();
-            }, 1000);
-        } else {
-            showMessage(result.message, 'error');
-        }
-        
-    } catch (error) {
-        showMessage('Error al importar datos: formato inválido', 'error');
-        console.error('Import error:', error);
-    }
-}
-
-// Add file import functionality
-function createFileImportInput() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                importData(e.target.result);
-            };
-            reader.readAsText(file);
-        }
-    };
-    return input;
-}
-
-function importFromFile() {
-    const input = createFileImportInput();
-    input.click();
-}
+/* === Export/Import helpers removed to streamline client code === */
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
@@ -370,14 +282,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Mensaje de bienvenida en consola
     console.log('Sistema de Días sin accidentes iniciado (Node.js version)');
     console.log('Tip: Escriba showStats() en la consola para ver estadísticas');
-    console.log('Tip: Escriba exportData() para exportar datos');
-    console.log('Tip: Escriba importFromFile() para importar datos desde archivo');
-    
-    // Hacer funciones disponibles globalmente
+
+    // Expose helper globally for manual inspection in dev tools
     window.showStats = showStats;
-    window.exportData = exportData;
-    window.importFromFile = importFromFile;
-    window.importData = importData;
     
     // Auto-refresh data every 5 minutes to check for daily increments
     setInterval(loadData, 5 * 60 * 1000);
