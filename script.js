@@ -226,7 +226,7 @@ function openAdminPanel() {
 function closeAdminPanel() {
     adminPanel.classList.add('hidden');
     isAdminPanelOpen = false;
-    adminBtn.textContent = 'Acceso Administrativo';
+    adminBtn.textContent = 'Administración';
     clearMessage();
     
     // Limpiar campos
