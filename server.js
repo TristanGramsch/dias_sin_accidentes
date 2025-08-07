@@ -217,16 +217,20 @@ app.get('/', (req, res) => {
 });
 
 // ===== Start server (HTTPS preferred) =====
-
 // Allow overriding certificate paths via environment variables for flexible dev/prod setups
 const CERT_PATH = process.env.CERT_PATH || path.join(__dirname, 'cert.pem');
 const KEY_PATH  = process.env.KEY_PATH  || path.join(__dirname, 'key.pem');
 const CA_PATH   = process.env.CA_PATH   || path.join(__dirname, 'ca.pem');
 
-let serverCallback = () => {
-    console.log(`🚀 Días sin accidentes server running on http://0.0.0.0:${PORT}`);
-    console.log(`📊 Local access: http://localhost:${PORT}`);
-    console.log(`🌐 Network access: http://192.168.0.3:${PORT}`);
+// Determine if HTTPS will be used (both cert and key must exist)
+const useHttps = fsSync.existsSync(CERT_PATH) && fsSync.existsSync(KEY_PATH);
+
+// Log helper – prints URLs with the proper protocol
+const serverCallback = () => {
+    const proto = useHttps ? 'https' : 'http';
+    console.log(`🚀 Días sin accidentes server running on ${proto}://0.0.0.0:${PORT}`);
+    console.log(`📊 Local access: ${proto}://localhost:${PORT}`);
+    console.log(`🌐 Network access: ${proto}://192.168.0.3:${PORT}`);
     console.log(`📊 Data file: ${DATA_FILE}`);
 
     // Initialize daily increment check
@@ -237,7 +241,7 @@ let serverCallback = () => {
     });
 };
 
-if (fsSync.existsSync(CERT_PATH) && fsSync.existsSync(KEY_PATH)) {
+if (useHttps) {
     const options = {
         cert: fsSync.readFileSync(CERT_PATH),
         key:  fsSync.readFileSync(KEY_PATH),
