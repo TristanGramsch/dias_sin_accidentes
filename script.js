@@ -1,6 +1,4 @@
 // Configuración
-const ADMIN_PASSWORD = 'jefecito'; // This will be sent to server for validation
-
 // Elementos del DOM
 const dayCounter = document.getElementById('dayCounter');
 const lastUpdate = document.getElementById('lastUpdate');

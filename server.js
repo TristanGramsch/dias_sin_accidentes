@@ -5,13 +5,16 @@ const fs = require('fs').promises;
 const path = require('path');
 const https = require('https');
 const fsSync = require('fs');
+const { ensureDailyIncrement, loadData } = require('./lib/counter');
+const { ChileMidnightScheduler } = require('./lib/scheduler');
+const { formatChile } = require('./lib/time');
 
 const app = express();
 const PORT = process.env.PORT || 443;
-const DATA_FILE = path.join(__dirname, 'data.json');
+const DATA_FILE = process.env.DATA_FILE || path.join(__dirname, 'data.json');
 
-// Configuration
-const ADMIN_PASSWORD = 'jefecito';
+// Configuration (simplified auth)
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'jefecito';
 const TIME_ZONE = 'America/Santiago'; // Chilean Time (CLT)
 
 // Middleware
@@ -19,80 +22,30 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('./')); // Serve static files from current directory
 
-// Utility functions
-function formatDate(date) {
-    return new Intl.DateTimeFormat('es-ES', {
-        timeZone: TIME_ZONE,
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    }).format(date);
-}
-
-// Data management functions
-async function loadData() {
-    try {
-        const data = await fs.readFile(DATA_FILE, 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        // If file doesn't exist or is corrupted, return default data
-        const defaultData = {
-            diasSinAccidentes: 0,
-            ultimaActualizacion: new Date().toISOString(),
-            ultimoIncremento: new Date().toDateString()
-        };
-        await saveData(defaultData);
-        return defaultData;
-    }
-}
-
-async function saveData(data) {
-    try {
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        return true;
-    } catch (error) {
-        console.error('Error saving data:', error);
+// Simplified auth: validate plain password per request
+function requirePassword(req, res) {
+    const { password } = req.body || {};
+    if (!password || password !== ADMIN_PASSWORD) {
+        res.status(401).json({ success: false, message: 'Contraseña incorrecta' });
         return false;
     }
+    return true;
 }
 
-// Check and handle daily increment
-async function checkDailyIncrement() {
-    try {
-        const data = await loadData();
-        const today = new Date().toDateString();
-        
-        if (data.ultimoIncremento !== today) {
-            // Only increment if this isn't the first time loading
-            if (data.ultimoIncremento) {
-                data.diasSinAccidentes++;
-                data.ultimaActualizacion = new Date().toISOString();
-            }
-            data.ultimoIncremento = today;
-            await saveData(data);
-        }
-        
-        return data;
-    } catch (error) {
-        console.error('Error in daily increment check:', error);
-        return await loadData();
-    }
-}
+// Note: date formatting now centralized in lib/time via formatChile
 
 // API Routes
 
 // Get current counter data
 app.get('/api/counter', async (req, res) => {
     try {
-        const data = await checkDailyIncrement();
+        const { data } = await ensureDailyIncrement();
         res.json({
             success: true,
             data: {
                 diasSinAccidentes: data.diasSinAccidentes,
                 ultimaActualizacion: data.ultimaActualizacion,
-                ultimaActualizacionFormatted: formatDate(new Date(data.ultimaActualizacion))
+                ultimaActualizacionFormatted: formatChile(new Date(data.ultimaActualizacion))
             }
         });
     } catch (error) {
@@ -107,15 +60,8 @@ app.get('/api/counter', async (req, res) => {
 // Update counter (admin only)
 app.post('/api/counter/update', async (req, res) => {
     try {
-        const { password, dias } = req.body;
-        
-        // Validate password
-        if (!password || password !== ADMIN_PASSWORD) {
-            return res.status(401).json({
-                success: false,
-                message: 'Contraseña incorrecta'
-            });
-        }
+        if (!requirePassword(req, res)) return;
+        const { dias } = req.body;
         
         // Validate days input
         const newDays = parseInt(dias, 10);
@@ -131,8 +77,11 @@ app.post('/api/counter/update', async (req, res) => {
         
         data.diasSinAccidentes = newDays;
         data.ultimaActualizacion = new Date().toISOString();
-        data.ultimoIncremento = new Date().toDateString();
+        // Keep lastRunChileDate in sync with current Chile day for idempotency
+        const { getChileTodayISODate } = require('./lib/time');
+        data.lastRunChileDate = getChileTodayISODate();
         
+        const { saveData } = require('./lib/counter');
         const success = await saveData(data);
         
         if (success) {
@@ -142,7 +91,7 @@ app.post('/api/counter/update', async (req, res) => {
                 data: {
                     diasSinAccidentes: data.diasSinAccidentes,
                     ultimaActualizacion: data.ultimaActualizacion,
-                    ultimaActualizacionFormatted: formatDate(new Date(data.ultimaActualizacion))
+                    ultimaActualizacionFormatted: formatChile(new Date(data.ultimaActualizacion))
                 }
             });
         } else {
@@ -163,23 +112,16 @@ app.post('/api/counter/update', async (req, res) => {
 // Reset counter to 0 (admin only)
 app.post('/api/counter/reset', async (req, res) => {
     try {
-        const { password } = req.body;
-        
-        // Validate password
-        if (!password || password !== ADMIN_PASSWORD) {
-            return res.status(401).json({
-                success: false,
-                message: 'Contraseña incorrecta'
-            });
-        }
-        
+        if (!requirePassword(req, res)) return;
         const data = await loadData();
         const oldDays = data.diasSinAccidentes;
         
         data.diasSinAccidentes = 0;
         data.ultimaActualizacion = new Date().toISOString();
-        data.ultimoIncremento = new Date().toDateString();
+        const { getChileTodayISODate } = require('./lib/time');
+        data.lastRunChileDate = getChileTodayISODate();
         
+        const { saveData } = require('./lib/counter');
         const success = await saveData(data);
         
         if (success) {
@@ -189,7 +131,7 @@ app.post('/api/counter/reset', async (req, res) => {
                 data: {
                     diasSinAccidentes: data.diasSinAccidentes,
                     ultimaActualizacion: data.ultimaActualizacion,
-                    ultimaActualizacionFormatted: formatDate(new Date(data.ultimaActualizacion))
+                    ultimaActualizacionFormatted: formatChile(new Date(data.ultimaActualizacion))
                 }
             });
         } else {
@@ -233,12 +175,18 @@ const serverCallback = () => {
     console.log(`🌐 Network access: ${proto}://192.168.0.3:${PORT}`);
     console.log(`📊 Data file: ${DATA_FILE}`);
 
-    // Initialize daily increment check
-    checkDailyIncrement().then(() => {
-        console.log('✅ Daily increment check completed');
+    // Initialize idempotent daily increment and start scheduler at Chile midnight
+    ensureDailyIncrement().then(({ incrementsApplied }) => {
+        console.log(`✅ Startup daily check done. Applied increments: ${incrementsApplied}`);
     }).catch((error) => {
-        console.error('❌ Error in daily increment check:', error);
+        console.error('❌ Error in startup daily check:', error);
     });
+
+    const scheduler = new ChileMidnightScheduler(async () => {
+        const { incrementsApplied } = await ensureDailyIncrement();
+        console.log(`📈 Daily rollover executed. Increments applied: ${incrementsApplied}`);
+    });
+    scheduler.start();
 };
 
 if (useHttps) {

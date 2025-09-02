@@ -26,12 +26,3 @@ docker run -d --name dias-counter \
   --restart unless-stopped \
   dias-sin-accidentes
 ```
-
-## Produce una REST API
-
-## Variables en el entorno
-
-- `PORT` – Puerto de escucha (por defecto 443)
-- `CERT_PATH` – Ruta personalizada al certificado
-- `KEY_PATH` – Ruta personalizada a la llave
-- `ADMIN_PASSWORD` – Sobrescribe la contraseña admin por defecto
