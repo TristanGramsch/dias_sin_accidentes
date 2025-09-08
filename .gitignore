@@ -1,5 +1,8 @@
 node_modules
 npm-debug.log
 .env
-.env.*
-.DS_Store
+*.pem
+data.json
+# Not sure if this is wise
+package-lock.json
+entrypoint.sh
