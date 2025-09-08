@@ -8,8 +8,6 @@
     "dev": "nodemon server.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "router:inspect": "node scripts/router_inspect.js",
-    "router:work:inspect": "node router_work/router_inspect.js",
     "docker:build": "docker build -t dias-sin-accidentes .",
     "docker:run": "docker run -d --name dias-counter -p 8080:8080 --restart unless-stopped dias-sin-accidentes",
     "docker:run:443": "docker run -d --name dias-counter -p 443:443 --restart unless-stopped -e PORT=443 dias-sin-accidentes",
