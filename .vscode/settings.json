@@ -1,0 +1,6 @@
+{
+  "workbench.editor.restoreEditors": false,
+  "workbench.startupEditor": "none",
+  "workbench.editor.restoreViewState": false,
+  "terminal.integrated.enablePersistentSessions": false
+}

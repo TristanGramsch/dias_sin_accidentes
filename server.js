@@ -5,24 +5,24 @@ const fs = require('fs').promises;
 const path = require('path');
 const https = require('https');
 const fsSync = require('fs');
+const os = require('os');
 const { ensureDailyIncrement, loadData } = require('./lib/counter');
 const { ChileMidnightScheduler } = require('./lib/scheduler');
 const { formatChile } = require('./lib/time');
 
 const app = express();
-const PORT = process.env.PORT || 443;
 const DATA_FILE = process.env.DATA_FILE || path.join(__dirname, 'data.json');
 
-// Configuration (simplified auth)
+// Configuration for admin auth and timezone (simplified auth).
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'jefecito';
 const TIME_ZONE = 'America/Santiago'; // Chilean Time (CLT)
 
-// Middleware
+// Middleware enabling CORS, JSON parsing, and static file serving.
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('./')); // Serve static files from current directory
 
-// Simplified auth: validate plain password per request
+// Validates the admin password on each request to protect privileged endpoints.
 function requirePassword(req, res) {
     const { password } = req.body || {};
     if (!password || password !== ADMIN_PASSWORD) {
@@ -32,11 +32,11 @@ function requirePassword(req, res) {
     return true;
 }
 
-// Note: date formatting now centralized in lib/time via formatChile
+// Date formatting is centralized in lib/time via formatChile for consistency.
 
-// API Routes
+// Counter API routes to read, update, and reset values.
 
-// Get current counter data
+// Returns the current counter data with a Chile-formatted timestamp.
 app.get('/api/counter', async (req, res) => {
     try {
         const { data } = await ensureDailyIncrement();
@@ -57,13 +57,13 @@ app.get('/api/counter', async (req, res) => {
     }
 });
 
-// Update counter (admin only)
+// Validates admin and updates the counter, syncing Chile date for idempotency.
 app.post('/api/counter/update', async (req, res) => {
     try {
         if (!requirePassword(req, res)) return;
         const { dias } = req.body;
         
-        // Validate days input
+        // Validates that days is a non-negative integer.
         const newDays = parseInt(dias, 10);
         if (isNaN(newDays) || newDays < 0) {
             return res.status(400).json({
@@ -77,7 +77,7 @@ app.post('/api/counter/update', async (req, res) => {
         
         data.diasSinAccidentes = newDays;
         data.ultimaActualizacion = new Date().toISOString();
-        // Keep lastRunChileDate in sync with current Chile day for idempotency
+        // Keeps lastRunChileDate in sync with the current Chile day for idempotency.
         const { getChileTodayISODate } = require('./lib/time');
         data.lastRunChileDate = getChileTodayISODate();
         
@@ -109,7 +109,7 @@ app.post('/api/counter/update', async (req, res) => {
     }
 });
 
-// Reset counter to 0 (admin only)
+// Validates admin and resets the counter to zero, starting a new period.
 app.post('/api/counter/reset', async (req, res) => {
     try {
         if (!requirePassword(req, res)) return;
@@ -153,26 +153,70 @@ app.post('/api/counter/reset', async (req, res) => {
    Route implementations have been removed to simplify the API surface.
    Refer to git history if you need the original code. */
 
-// Serve the main page
+// Serves the main HTML page.
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// ===== Start server (HTTPS preferred) =====
-// Allow overriding certificate paths via environment variables for flexible dev/prod setups
-const CERT_PATH = process.env.CERT_PATH || path.join(__dirname, 'cert.pem');
-const KEY_PATH  = process.env.KEY_PATH  || path.join(__dirname, 'key.pem');
-const CA_PATH   = process.env.CA_PATH   || path.join(__dirname, 'ca.pem');
+// Starts the server with HTTPS when certificates are present, otherwise falls back to HTTP.
+// Certificate paths can be overridden via environment variables for flexible dev/prod setups.
+function findFirstExisting(paths) {
+    for (const p of paths) {
+        if (p && fsSync.existsSync(p)) return p;
+    }
+    return undefined;
+}
 
-// Determine if HTTPS will be used (both cert and key must exist)
-const useHttps = fsSync.existsSync(CERT_PATH) && fsSync.existsSync(KEY_PATH);
+const CERT_PATH = findFirstExisting([
+    process.env.CERT_PATH,
+    path.join(__dirname, 'cert.pem'),
+    path.join(__dirname, 'Certificate.pem'),
+    path.join(__dirname, 'fullchain.pem')
+]);
 
-// Log helper – prints URLs with the proper protocol
+const KEY_PATH = findFirstExisting([
+    process.env.KEY_PATH,
+    path.join(__dirname, 'key.pem'),
+    path.join(__dirname, 'Private Key.pem'),
+    path.join(__dirname, 'privkey.pem')
+]);
+
+const CA_PATH = findFirstExisting([
+    process.env.CA_PATH,
+    path.join(__dirname, 'ca.pem'),
+    path.join(__dirname, 'Certificate Authority Bundle.pem'),
+    path.join(__dirname, 'chain.pem')
+]);
+
+// Enables HTTPS when both certificate and key are present.
+const useHttps = Boolean(CERT_PATH && KEY_PATH);
+
+// Choose sensible default port based on protocol; allow env override.
+let PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : undefined;
+if (!PORT || Number.isNaN(PORT)) {
+    PORT = useHttps ? 443 : 8080;
+}
+
+function getFirstNonInternalIPv4() {
+    const nets = os.networkInterfaces();
+    for (const name of Object.keys(nets)) {
+        for (const net of nets[name] || []) {
+            if (net && net.family === 'IPv4' && !net.internal) {
+                return net.address;
+            }
+        }
+    }
+    return null;
+}
+
+// Startup callback that logs URLs and schedules the daily Chile-midnight task.
 const serverCallback = () => {
     const proto = useHttps ? 'https' : 'http';
-    console.log(`🚀 Días sin accidentes server running on ${proto}://0.0.0.0:${PORT}`);
-    console.log(`📊 Local access: ${proto}://localhost:${PORT}`);
-    console.log(`🌐 Network access: ${proto}://192.168.0.3:${PORT}`);
+    console.log(`🚀 Días sin accidentes running at ${proto}://localhost:${PORT}`);
+    const ip = getFirstNonInternalIPv4();
+    if (ip) {
+        console.log(`🌐 Network access: ${proto}://${ip}:${PORT}`);
+    }
     console.log(`📊 Data file: ${DATA_FILE}`);
 
     // Initialize idempotent daily increment and start scheduler at Chile midnight

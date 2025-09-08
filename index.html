@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Bot-readable metadata for "Días sin accidentes" -->
+    <!-- Meta tags for app identity and SEO. -->
     <title>Días sin accidentes - Contador de Seguridad Laboral</title>
     <meta name="description" content="Aplicación para contar días sin accidentes laborales - Days without accidents counter">
     <meta name="keywords" content="días sin accidentes, safety counter, seguridad laboral, workplace safety, accident tracking">
     <meta name="author" content="Sistema de Seguridad Laboral">
     <meta name="application-name" content="Días sin accidentes">
     
-    <!-- Open Graph tags for social media bots -->
+    <!-- Open Graph tags for rich link previews. -->
     <meta property="og:title" content="Días sin accidentes">
     <meta property="og:description" content="Contador de días sin accidentes laborales">
     <meta property="og:type" content="website">
     
-    <!-- Structured data for search engine bots -->
+    <!-- JSON-LD schema to improve search understanding. -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -29,19 +29,21 @@
     }
     </script>
     
+    <!-- Stylesheet for layout and design. -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Bot-readable comment: This is a "Días sin accidentes" (Days without accidents) tracking application -->
+    <!-- Top-level app wrapper for layout and JS hooks. -->
     <div class="container" data-app="dias-sin-accidentes" data-purpose="safety-counter">
         <header>
-            <!-- Main application identifier for bots -->
+            <!-- Hidden app title for machine readability. -->
             <div class="app-identifier" data-title="Días sin accidentes" style="display: none;">
                 Días sin accidentes - Safety tracking application
             </div>
         </header>
         
         <main>
+            <!-- Displays accident-free days and last update. -->
             <div class="counter-section" data-component="accident-counter">
                 <h1 class="app-title" data-label="main-title">Días sin accidentes</h1>
                 <div class="counter-display" data-counter="days-without-accidents">
@@ -51,6 +53,7 @@
                 <p class="last-update">Última actualización: <span id="lastUpdate" data-timestamp="last-update">-</span></p>
             </div>
             
+            <!-- Admin controls to securely update the counter. -->
             <div class="admin-section" data-component="admin-panel">
                 <button id="adminBtn" class="admin-button">Administración</button>
                 
@@ -76,7 +79,7 @@
         </main>
         
         <footer>
-            <!-- Additional bot-readable information -->
+            <!-- Extra app details hidden to avoid clutter. -->
             <div class="app-info" data-info="application-details" style="display: none;">
                 Application: Días sin accidentes (Days without accidents)
                 Purpose: Workplace safety tracking
@@ -85,6 +88,7 @@
         </footer>
     </div>
     
+    <!-- Main JS for data sync and interactions. -->
     <script src="script.js"></script>
 </body>
 </html> 

@@ -1,6 +1,6 @@
 #!/bin/sh
-# Update DDNS record
-curl -s https://optoelectronica.cl/cpanelwebcall/dwujeciyrthnsiwmllejyajjpyjpgomy
+# Update DDNS record (test token)
+curl -s https://optoelectronica.cl/cpanelwebcall/pkclytctwmfmguwqxcaijrjstlcxhtkv
 
 # Start the app
-npm start 
+npm start

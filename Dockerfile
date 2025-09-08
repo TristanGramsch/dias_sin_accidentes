@@ -14,8 +14,8 @@ RUN npm ci --only=production
 # Copy app source
 COPY . .
 
-# Expose port 443 (HTTPS port)
-EXPOSE 443
+# Expose ports: 8080 for HTTP fallback, 443 for HTTPS
+EXPOSE 8080 443
 
 # Start the app
 COPY entrypoint.sh /entrypoint.sh

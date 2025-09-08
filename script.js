@@ -1,5 +1,4 @@
-// Configuración
-// Elementos del DOM
+// DOM references for UI and admin controls.
 const dayCounter = document.getElementById('dayCounter');
 const lastUpdate = document.getElementById('lastUpdate');
 const adminBtn = document.getElementById('adminBtn');
@@ -9,11 +8,12 @@ const daysInput = document.getElementById('daysInput');
 const updateBtn = document.getElementById('updateBtn');
 const message = document.getElementById('message');
 
-// Estado de la aplicación
+// In-memory state for counter and panel visibility.
 let currentDays = 0;
 let isAdminPanelOpen = false;
 
-// Funciones de utilidad
+// Utilities for formatting and transient messages.
+// Formats a Date for display to produce human-readable timestamps.
 function formatDate(date) {
     return new Intl.DateTimeFormat('es-ES', {
         timeZone: 'America/Santiago',
@@ -24,23 +24,24 @@ function formatDate(date) {
         minute: '2-digit'
     }).format(date);
 }
-
+// Displays a transient message to give immediate user feedback.
 function showMessage(text, type = 'success') {
     message.textContent = text;
     message.className = `message ${type}`;
     message.style.display = 'block';
     
-    // Ocultar mensaje después de 3 segundos
+    // This timeout hides the message after 3 seconds.
     setTimeout(() => {
         message.style.display = 'none';
     }, 3000);
 }
-
+// Hides any visible message to reset the feedback area.
 function clearMessage() {
     message.style.display = 'none';
 }
 
-// API Functions
+// Defines API calls to load, update, and reset the counter.
+// Fetches the current counter state to populate the UI on start and refresh.
 async function loadData() {
     try {
         const response = await fetch('/api/counter');
@@ -58,13 +59,14 @@ async function loadData() {
         showMessage('Error de conexión al servidor', 'error');
         console.error('Network error:', error);
         
-        // Fallback to display 0 if server is not available
+        // Falls back to 0 when a network error occurs.
         currentDays = 0;
         updateDisplay();
         lastUpdate.textContent = 'Error de conexión';
     }
 }
 
+// Persists a new days value to save admin changes.
 async function updateDaysOnServer(password, days) {
     try {
         const response = await fetch('/api/counter/update', {
@@ -88,6 +90,7 @@ async function updateDaysOnServer(password, days) {
     }
 }
 
+// Resets the counter to zero to start a new period.
 async function resetCounterOnServer(password) {
     try {
         const response = await fetch('/api/counter/reset', {
@@ -110,18 +113,18 @@ async function resetCounterOnServer(password) {
     }
 }
 
-// Función para actualizar la visualización
+// Renders the count with a subtle animation to provide visual feedback.
 function updateDisplay() {
     dayCounter.textContent = currentDays;
     
-    // Añadir efecto de animación
+    // This animation provides visual feedback.
     dayCounter.style.transform = 'scale(1.1)';
     setTimeout(() => {
         dayCounter.style.transform = 'scale(1)';
     }, 200);
 }
 
-// Función para validar contraseña
+// Validates that a password is provided and returns it or false.
 function validatePassword() {
     const enteredPassword = passwordInput.value.trim();
     
@@ -133,7 +136,7 @@ function validatePassword() {
     return enteredPassword;
 }
 
-// Función para actualizar días
+// Updates days by validating input, calling the API, and refreshing the UI.
 async function updateDays() {
     const password = validatePassword();
     if (!password) {
@@ -147,13 +150,13 @@ async function updateDays() {
         return;
     }
     
-    // Show loading state
+    // Shows a loading state while the request runs.
     updateBtn.textContent = 'Actualizando...';
     updateBtn.disabled = true;
     
     const result = await updateDaysOnServer(password, newDays);
     
-    // Reset button state
+    // Restores the button to its normal state.
     updateBtn.textContent = 'Actualizar';
     updateBtn.disabled = false;
     
@@ -172,7 +175,7 @@ async function updateDays() {
     }
 }
 
-// Función para resetear contador
+// Resets the counter after confirmation by calling the API and refreshing the UI.
 async function resetCounter() {
     const password = validatePassword();
     if (!password) {
@@ -200,7 +203,7 @@ async function resetCounter() {
     }
 }
 
-// Función para abrir/cerrar panel de administración
+// Toggles the admin panel visibility.
 function toggleAdminPanel() {
     if (isAdminPanelOpen) {
         closeAdminPanel();
@@ -208,7 +211,7 @@ function toggleAdminPanel() {
         openAdminPanel();
     }
 }
-
+// Reveals the admin UI, focuses input, and prepares for entry.
 function openAdminPanel() {
     adminPanel.classList.remove('hidden');
     isAdminPanelOpen = true;
@@ -216,27 +219,30 @@ function openAdminPanel() {
     passwordInput.focus();
     clearMessage();
     
-    // Limpiar campos
+    // This clears the admin input fields.
     passwordInput.value = '';
     daysInput.value = '';
 }
-
+// Hides the admin UI, clears inputs, and restores state.
 function closeAdminPanel() {
     adminPanel.classList.add('hidden');
     isAdminPanelOpen = false;
     adminBtn.textContent = 'Administración';
     clearMessage();
     
-    // Limpiar campos
+    // This clears the admin input fields.
     passwordInput.value = '';
     daysInput.value = '';
 }
 
-// Event listeners
+// Wires UI controls to their behaviors with event listeners.
+// Clicking the Admin button toggles the panel to access controls.
 adminBtn.addEventListener('click', toggleAdminPanel);
+// Clicking the Update button submits the days to apply changes.
 updateBtn.addEventListener('click', updateDays);
 
-// Permitir usar Enter en los campos de entrada
+// Enables Enter key interactions for faster input.
+// Pressing Enter in the password field submits if days are filled, otherwise focuses the days field.
 passwordInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         if (daysInput.value.trim() !== '') {
@@ -246,14 +252,14 @@ passwordInput.addEventListener('keypress', (e) => {
         }
     }
 });
-
+// Pressing Enter in the days field submits the update for quick confirmation.
 daysInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         updateDays();
     }
 });
 
-// Función para mostrar estadísticas adicionales
+// Provides a console stats helper for manual inspection.
 async function showStats() {
     if (currentDays > 0) {
         const startDate = new Date();
@@ -270,25 +276,25 @@ async function showStats() {
 
 /* === Export/Import helpers removed to streamline client code === */
 
-// Inicialización
+// Bootstraps the app when the DOM is ready.
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     
-    // Agregar efecto de transición suave al contador
+    // Applies a smooth transition to the counter.
     dayCounter.style.transition = 'transform 0.2s ease';
     
-    // Mensaje de bienvenida en consola
+    // Outputs welcome logs.
     console.log('Sistema de Días sin accidentes iniciado (Node.js version)');
     console.log('Tip: Escriba showStats() en la consola para ver estadísticas');
 
-    // Expose helper globally for manual inspection in dev tools
+    // Exposes the helper globally for manual inspection in dev tools.
     window.showStats = showStats;
     
-    // Auto-refresh data every 5 minutes to check for daily increments
+    // Auto-refreshes every 5 minutes to check for daily increments.
     setInterval(loadData, 5 * 60 * 1000);
 });
 
-// Handle page visibility change to refresh data when user returns
+// Refreshes data when the tab becomes visible to keep it current.
 document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
         loadData();
