@@ -51,6 +51,7 @@
                     <span class="days-label" data-unit="days">días</span>
                 </div>
                 <p class="last-update">Última actualización: <span id="lastUpdate" data-timestamp="last-update">-</span></p>
+                <p class="record">Récord anterior: <span id="previousRecord" data-value="previous-record">-</span></p>
             </div>
             
             <!-- Admin controls to securely update the counter. -->
@@ -64,6 +65,11 @@
                         <input type="password" id="passwordInput" placeholder="Ingrese la clave">
                     </div>
                     
+                    <div class="form-group">
+                        <label for="previousRecordInput">Récord anterior (opcional):</label>
+                        <input type="number" id="previousRecordInput" min="0" placeholder="Récord anterior">
+                    </div>
+
                     <div class="form-group">
                         <label for="daysInput">Nuevo valor de días:</label>
                         <input type="number" id="daysInput" min="0" placeholder="Número de días">

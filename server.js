@@ -46,6 +46,8 @@ app.get('/api/counter', async (req, res) => {
                 diasSinAccidentes: data.diasSinAccidentes,
                 ultimaActualizacion: data.ultimaActualizacion,
                 ultimaActualizacionFormatted: formatChile(new Date(data.ultimaActualizacion))
+                ,
+                recordAnterior: data.recordAnterior ?? null
             }
         });
     } catch (error) {
@@ -76,6 +78,11 @@ app.post('/api/counter/update', async (req, res) => {
         const oldDays = data.diasSinAccidentes;
         
         data.diasSinAccidentes = newDays;
+        // Allow optional previous record value from admin panel
+        if (req.body.recordAnterior !== undefined) {
+            const recordVal = parseInt(req.body.recordAnterior, 10);
+            data.recordAnterior = (!isNaN(recordVal) && recordVal >= 0) ? recordVal : data.recordAnterior ?? null;
+        }
         data.ultimaActualizacion = new Date().toISOString();
         // Keeps lastRunChileDate in sync with the current Chile day for idempotency.
         const { getChileTodayISODate } = require('./lib/time');
@@ -91,7 +98,8 @@ app.post('/api/counter/update', async (req, res) => {
                 data: {
                     diasSinAccidentes: data.diasSinAccidentes,
                     ultimaActualizacion: data.ultimaActualizacion,
-                    ultimaActualizacionFormatted: formatChile(new Date(data.ultimaActualizacion))
+                    ultimaActualizacionFormatted: formatChile(new Date(data.ultimaActualizacion)),
+                    recordAnterior: data.recordAnterior ?? null
                 }
             });
         } else {

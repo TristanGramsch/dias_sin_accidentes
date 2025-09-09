@@ -1,6 +1,7 @@
 // DOM references for UI and admin controls.
 const dayCounter = document.getElementById('dayCounter');
 const lastUpdate = document.getElementById('lastUpdate');
+const previousRecordEl = document.getElementById('previousRecord');
 const adminBtn = document.getElementById('adminBtn');
 const adminPanel = document.getElementById('adminPanel');
 const passwordInput = document.getElementById('passwordInput');
@@ -11,6 +12,7 @@ const message = document.getElementById('message');
 // In-memory state for counter and panel visibility.
 let currentDays = 0;
 let isAdminPanelOpen = false;
+let previousRecord = null;
 
 // Utilities for formatting and transient messages.
 // Formats a Date for display to produce human-readable timestamps.
@@ -51,6 +53,9 @@ async function loadData() {
             currentDays = result.data.diasSinAccidentes;
             updateDisplay();
             lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
+            // Populate previous record if present
+            previousRecord = result.data.recordAnterior ?? null;
+            previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
         } else {
             showMessage('Error al cargar los datos', 'error');
             console.error('Error loading data:', result.message);
@@ -69,15 +74,17 @@ async function loadData() {
 // Persists a new days value to save admin changes.
 async function updateDaysOnServer(password, days) {
     try {
+        // Allow an optional third argument `previousRecord` but keep backward compatibility
+        const previousRecord = arguments.length >= 3 ? arguments[2] : undefined;
+        const body = { password: password, dias: days };
+        if (previousRecord !== undefined) body.recordAnterior = previousRecord;
+
         const response = await fetch('/api/counter/update', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                password: password,
-                dias: days
-            })
+            body: JSON.stringify(body)
         });
         
         const result = await response.json();
@@ -154,7 +161,13 @@ async function updateDays() {
     updateBtn.textContent = 'Actualizando...';
     updateBtn.disabled = true;
     
-    const result = await updateDaysOnServer(password, newDays);
+    // include optional previous record if provided in admin panel
+    const previousRecordInput = document.getElementById('previousRecordInput');
+    const previousRecordValue = previousRecordInput && previousRecordInput.value.trim() !== ''
+        ? parseInt(previousRecordInput.value, 10)
+        : undefined;
+
+    const result = await updateDaysOnServer(password, newDays, previousRecordValue);
     
     // Restores the button to its normal state.
     updateBtn.textContent = 'Actualizar';
@@ -164,6 +177,8 @@ async function updateDays() {
         currentDays = result.data.diasSinAccidentes;
         updateDisplay();
         lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
+        previousRecord = result.data.recordAnterior ?? previousRecord;
+        previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
         showMessage(result.message, 'success');
         closeAdminPanel();
     } else {
@@ -192,6 +207,8 @@ async function resetCounter() {
         currentDays = result.data.diasSinAccidentes;
         updateDisplay();
         lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
+        previousRecord = result.data.recordAnterior ?? previousRecord;
+        previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
         showMessage(result.message, 'success');
         closeAdminPanel();
     } else {

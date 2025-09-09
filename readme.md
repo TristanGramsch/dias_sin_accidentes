@@ -4,6 +4,7 @@ Aplicación de Node.js + Express que cuenta los días sin accidentes. Zona horar
 
 Docker test env
 ```bash
+docker build -t dias-sin-accidentes-test /home/tristan/dias_sin_accidentes
 docker run -d --name dias-test --restart unless-stopped -p 4443:443 -p 8080:8080 -v /home/tristan/dias_sin_accidentes:/app dias-sin-accidentes-test
 ```
 Explanation:
