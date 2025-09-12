@@ -2,7 +2,7 @@ Aplicación de Node.js + Express que cuenta los días sin accidentes. Zona horar
 
 - HTTPS DDNS mediante certificados `.pem`
 
-Docker test env
+Test
 ```bash
 # Make entry point executable
 chmod +x /home/tristan/dias_sin_accidentes/entrypoint.sh
@@ -18,6 +18,29 @@ docker run -d --name dias-test --restart unless-stopped \
   -e CA_PATH="/app/Certificate Authority Bundle.pem" \
   dias-sin-accidentes:test
 ```
+
+Production 
+```bash
+# Pull latest image
+sudo docker pull tristangramsch/dias-sin-accidentes:latest
+# Make entry point executable
+chmod +x /home/pi/dias_sin_accidentes/entrypoint.sh
+# Build using local daemon (for arm64 base)
+sudo docker build -t tristangramsch/dias-sin-accidentes:latest /home/pi/dias_sin_accidentes
+# Remove previous container
+sudo docker rm -f dias-sin-accidentes || true
+# Run image
+# First port HTTPS mapped. Second HTTP fallback.
+sudo docker run -d --name dias-sin-accidentes --restart unless-stopped \
+  -p 443:443 -p 8080:8080 \
+  -v /home/pi/dias_sin_accidentes/entrypoint.sh:/entrypoint.sh:ro \
+  -v /home/pi/dias_sin_accidentes/cert.pem:/app/cert.pem:ro \
+  -v /home/pi/dias_sin_accidentes/key.pem:/app/key.pem:ro \
+  -v /home/pi/dias_sin_accidentes/ca.pem:/app/ca.pem:ro \
+  -e CERT_PATH="/app/cert.pem" -e KEY_PATH="/app/key.pem" -e CA_PATH="/app/ca.pem" \
+  dias-sin-accidentes:latest
+```
+
 Explanation:
 docker run: create and run a new container.
 -d: run detached (in background).
