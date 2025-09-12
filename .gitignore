@@ -3,6 +3,6 @@ npm-debug.log
 .env
 *.pem
 data.json
+entrypoint.sh
 # Not sure if this is wise
 package-lock.json
-entrypoint.sh
