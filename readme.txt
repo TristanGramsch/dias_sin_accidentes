@@ -23,12 +23,10 @@ docker run -d --name dias-test --restart unless-stopped \
 
 Production 
 ```bash
-# Pull latest image
-sudo docker pull tristangramsch/dias-sin-accidentes:latest
 # Make entry point executable
 chmod +x /home/pi/dias_sin_accidentes/entrypoint.sh
 # Build using local daemon (for arm64 base)
-sudo docker build -t tristangramsch/dias-sin-accidentes:latest /home/pi/dias_sin_accidentes
+sudo docker build -t dias-sin-accidentes:prod /home/pi/dias_sin_accidentes
 # Remove previous container
 sudo docker rm -f dias-sin-accidentes || true
 # Run image
@@ -40,7 +38,7 @@ sudo docker run -d --name dias-sin-accidentes --restart unless-stopped \
   -v /home/pi/dias_sin_accidentes/key.pem:/app/key.pem:ro \
   -v /home/pi/dias_sin_accidentes/ca.pem:/app/ca.pem:ro \
   -e CERT_PATH="/app/cert.pem" -e KEY_PATH="/app/key.pem" -e CA_PATH="/app/ca.pem" \
-  dias-sin-accidentes:latest
+  dias-sin-accidentes:prod
 ```
 
 Explanation:

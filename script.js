@@ -1,6 +1,7 @@
 // DOM references for UI and admin controls.
 const dayCounter = document.getElementById('dayCounter');
 const lastUpdate = document.getElementById('lastUpdate');
+// previousRecordEl (small inline label) was removed from the UI; keep safe lookup
 const previousRecordEl = document.getElementById('previousRecord');
 const previousRecordLargeEl = document.getElementById('previousRecordLarge');
 const adminBtn = document.getElementById('adminBtn');
@@ -56,7 +57,8 @@ async function loadData() {
             lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
             // Populate previous record if present
             previousRecord = result.data.recordAnterior ?? null;
-            previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
+            // previousRecordEl may not exist in the updated UI; update large bubble instead
+            if (previousRecordEl) previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
             // Also populate the large bubble display
             if (previousRecordLargeEl) {
                 previousRecordLargeEl.textContent = previousRecord !== null ? previousRecord : '-';
@@ -188,7 +190,7 @@ async function updateDays() {
         updateDisplay();
         lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
         previousRecord = result.data.recordAnterior ?? previousRecord;
-        previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
+        if (previousRecordEl) previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
         if (previousRecordLargeEl) previousRecordLargeEl.textContent = previousRecord !== null ? previousRecord : '-';
         showMessage(result.message, 'success');
         closeAdminPanel();
@@ -219,7 +221,7 @@ async function resetCounter() {
         updateDisplay();
         lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
         previousRecord = result.data.recordAnterior ?? previousRecord;
-        previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
+        if (previousRecordEl) previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
         if (previousRecordLargeEl) previousRecordLargeEl.textContent = previousRecord !== null ? previousRecord : '-';
         showMessage(result.message, 'success');
         closeAdminPanel();
