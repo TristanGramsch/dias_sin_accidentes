@@ -72,6 +72,26 @@ header h1 {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* Large bubble for previous record to visually match the main counter */
+.record-display {
+    background: linear-gradient(135deg, #ffb75e 0%, #ed8f03 100%);
+    color: white;
+    padding: 26px;
+    border-radius: 15px;
+    margin: 18px 0;
+    box-shadow: 0 10px 30px rgba(237, 143, 3, 0.2);
+    display: inline-block;
+    min-width: 220px;
+    text-align: center;
+}
+
+#previousRecordLarge {
+    font-size: 3.2rem;
+    font-weight: 700;
+    display: block;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.18);
+}
+
 .days-label {
     font-size: 1.5rem;
     font-weight: 300;

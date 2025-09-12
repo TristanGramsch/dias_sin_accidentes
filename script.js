@@ -2,6 +2,7 @@
 const dayCounter = document.getElementById('dayCounter');
 const lastUpdate = document.getElementById('lastUpdate');
 const previousRecordEl = document.getElementById('previousRecord');
+const previousRecordLargeEl = document.getElementById('previousRecordLarge');
 const adminBtn = document.getElementById('adminBtn');
 const adminPanel = document.getElementById('adminPanel');
 const passwordInput = document.getElementById('passwordInput');
@@ -56,6 +57,15 @@ async function loadData() {
             // Populate previous record if present
             previousRecord = result.data.recordAnterior ?? null;
             previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
+            // Also populate the large bubble display
+            if (previousRecordLargeEl) {
+                previousRecordLargeEl.textContent = previousRecord !== null ? previousRecord : '-';
+                // subtle animation
+                previousRecordLargeEl.style.transform = 'scale(1.03)';
+                setTimeout(() => {
+                    previousRecordLargeEl.style.transform = 'scale(1)';
+                }, 200);
+            }
         } else {
             showMessage('Error al cargar los datos', 'error');
             console.error('Error loading data:', result.message);
@@ -179,6 +189,7 @@ async function updateDays() {
         lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
         previousRecord = result.data.recordAnterior ?? previousRecord;
         previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
+        if (previousRecordLargeEl) previousRecordLargeEl.textContent = previousRecord !== null ? previousRecord : '-';
         showMessage(result.message, 'success');
         closeAdminPanel();
     } else {
@@ -209,6 +220,7 @@ async function resetCounter() {
         lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
         previousRecord = result.data.recordAnterior ?? previousRecord;
         previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
+        if (previousRecordLargeEl) previousRecordLargeEl.textContent = previousRecord !== null ? previousRecord : '-';
         showMessage(result.message, 'success');
         closeAdminPanel();
     } else {

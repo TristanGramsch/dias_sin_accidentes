@@ -7,7 +7,10 @@ RUN apk add --no-cache curl
 # Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Set production environment to avoid installing devDependencies in apk/npm
+ENV NODE_ENV=production
+
+# Copy package files and install production dependencies only
 COPY package*.json ./
 RUN npm ci --only=production
 
