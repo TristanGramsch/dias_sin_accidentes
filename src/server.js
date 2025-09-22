@@ -114,8 +114,8 @@ const KEY_PATH = process.env.KEY_PATH || undefined;
 const CA_PATH = process.env.CA_PATH || undefined;
 const useHttps = Boolean(CERT_PATH && KEY_PATH);
 
-let PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
-if (Number.isNaN(PORT) || PORT <= 0) PORT = 8080;
+let PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4443;
+if (Number.isNaN(PORT) || PORT <= 0) PORT = 4443;
 
 function getFirstNonInternalIPv4() {
     const nets = os.networkInterfaces();
