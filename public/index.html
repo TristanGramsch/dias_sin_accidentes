@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Días sin accidentes</title>
+  <link rel="stylesheet" href="/styles.css">
+  <meta name="description" content="Contador de días sin accidentes laborales">
+  <meta name="author" content="Optoelectrónica Icalma">
+  <meta name="application-name" content="Días sin accidentes">
+</head>
+<body>
+  <div class="container" data-app="dias-sin-accidentes">
+    <h1 class="app-title">Días sin accidentes</h1>
+    <div class="counter-display"><span id="dayCounter">0</span> <small>días</small></div>
+    <p class="last-update">Última actualización: <span id="lastUpdate">-</span></p>
+
+    <button id="adminBtn" class="admin-button">Administración</button>
+    <div id="adminPanel" class="admin-panel hidden">
+      <h3>Panel de administración</h3>
+      <div><label>Contraseña: <input id="passwordInput" type="password"></label></div>
+      <div><label>Récord anterior: <input id="previousRecordInput" type="number"></label></div>
+      <div><label>Días: <input id="daysInput" type="number"></label></div>
+      <div><button id="updateBtn">Actualizar</button></div>
+      <div id="message" class="message"></div>
+    </div>
+  </div>
+  <script src="/script.js"></script>
+</body>
+</html>
+
+
+

@@ -2,15 +2,14 @@
   "name": "dias-sin-accidentes",
   "version": "1.0.0",
   "description": "Node.js application to track days without incidents - Docker ready for port 443 deployment",
-  "main": "server.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "docker:build": "docker build -t dias-sin-accidentes .",
     "docker:run": "docker run -d --name dias-counter -p 8080:8080 --restart unless-stopped dias-sin-accidentes",
-    "docker:run:443": "docker run -d --name dias-counter -p 443:443 --restart unless-stopped -e PORT=443 dias-sin-accidentes",
     "docker:stop": "docker stop dias-counter",
     "docker:logs": "docker logs dias-counter",
     "docker:update": "npm run docker:stop && docker rm dias-counter && npm run docker:build && npm run docker:run"

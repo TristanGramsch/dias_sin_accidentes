@@ -43,3 +43,13 @@ Deployment
 Backups
 
 Create a counter that auto-increments once per day. Santiago de Chile time. Available as a website. Updated by users who know the password.
+
+This repo contains several legacy files. To minimize clutter, you can remove the following tracked files now that the app was reorganized:
+
+- `server.js` (moved to `src/server.js`)
+- `index.html` (moved to `public/index.html`)
+- `script.js` (moved to `public/script.js`)
+- `styles.css` (moved to `public/styles.css`)
+- `entrypoint.sh` (optional; used by older Docker image)
+
+Delete them only after confirming `src/` and `public/` versions work.
