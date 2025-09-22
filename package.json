@@ -9,7 +9,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "docker:build": "docker build -t dias-sin-accidentes .",
-    "docker:run": "docker run -d --name dias-counter -p 8080:8080 --restart unless-stopped dias-sin-accidentes",
+    "docker:run": "docker run -d --name dias-counter -p 4443:4443 --restart unless-stopped dias-sin-accidentes",
     "docker:stop": "docker stop dias-counter",
     "docker:logs": "docker logs dias-counter",
     "docker:update": "npm run docker:stop && docker rm dias-counter && npm run docker:build && npm run docker:run"

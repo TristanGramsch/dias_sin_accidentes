@@ -2,15 +2,16 @@ FROM node:18-slim
 
 WORKDIR /app
 
-# Install production dependencies
+# Copy source and package metadata
 COPY package*.json ./
-RUN npm ci --only=production
-
-# Copy app source
 COPY . .
 
+# Install dependencies (including dev for running tests), run tests, then prune dev deps
+RUN npm ci && npm test || (echo "Tests failed" && exit 1)
+RUN npm prune --production
+
 # Expose the default port (allow HTTPS on this port if supplied certs)
-EXPOSE 8080
+EXPOSE 4443
 
 # Default command
 CMD ["node", "src/server.js"]
