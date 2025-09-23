@@ -1,0 +1,24 @@
+[Unit]
+Description=Días Sin Accidentes - Ecolab
+After=network.target
+
+[Service]
+Type=simple
+User=tristan
+Group=tristan
+WorkingDirectory=/home/tristan/dias_sin_accidentes/instances/ecolab
+Environment=NODE_ENV=production
+Environment=PORT=3003
+Environment=DATA_FILE_PATH=/home/tristan/dias_sin_accidentes/instances/ecolab/data.ecolab.json
+Environment=CERT_PATH=/home/tristan/dias_sin_accidentes/instances/ecolab/Certs/ecolab/Certificate.pem
+Environment=KEY_PATH=/home/tristan/dias_sin_accidentes/instances/ecolab/Certs/ecolab/Private-key.pem
+Environment=CA_PATH=/home/tristan/dias_sin_accidentes/instances/ecolab/Certs/ecolab/Certificate-authority-bundle.pem
+ExecStart=/usr/bin/node src/server.js
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=dias-sin-accidentes-ecolab
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Meta tags for app identity and SEO. -->
+    <title>Días sin accidentes - Ecolab - Contador de Seguridad Laboral</title>
+    <meta name="description" content="Aplicación para contar días sin accidentes laborales - Days without accidents counter">
+    <meta name="keywords" content="días sin accidentes, safety counter, seguridad laboral, workplace safety, accident tracking">
+    <meta name="author" content="Sistema de Seguridad Laboral">
+    <meta name="application-name" content="Días sin accidentes - Ecolab">
+    
+    <!-- Open Graph tags for rich link previews. -->
+    <meta property="og:title" content="Días sin accidentes - Ecolab">
+    <meta property="og:description" content="Contador de días sin accidentes laborales">
+    <meta property="og:type" content="website">
+    
+    <!-- JSON-LD schema to improve search understanding. -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Días sin accidentes - Ecolab",
+        "description": "Aplicación para contar días sin accidentes laborales",
+        "applicationCategory": "Safety Management",
+        "operatingSystem": "Web Browser",
+        "keywords": "días sin accidentes, seguridad laboral, workplace safety"
+    }
+    </script>
+    
+    <!-- Stylesheet for layout and design. -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Top-level app wrapper for layout and JS hooks. -->
+    <div class="container" data-app="dias-sin-accidentes" data-purpose="safety-counter">
+        <header>
+            <!-- Hidden app title for machine readability. -->
+            <div class="app-identifier" data-title="Días sin accidentes - Ecolab" style="display: none;">
+                Días sin accidentes - Ecolab - Safety tracking application
+            </div>
+        </header>
+        
+        <main>
+            <!-- Displays accident-free days and last update. -->
+            <div class="counter-section" data-component="accident-counter">
+                <h1 class="app-title" data-label="main-title">Días sin accidentes - Ecolab</h1>
+                <div class="counter-display" data-counter="days-without-accidents">
+                    <span id="dayCounter" data-value="accident-free-days">0</span>
+                    <span class="days-label" data-unit="days">días</span>
+                </div>
+
+                <!-- Large bubble display for previous record (mirrors main counter style) -->
+                <div class="record-display" data-counter="previous-record">
+                    <span id="previousRecordLarge" data-value="previous-record-large">-</span>
+                    <span class="days-label" aria-hidden="true">días</span>
+                </div>
+
+                <p class="last-update">Última actualización: <span id="lastUpdate" data-timestamp="last-update">-</span></p>
+                <p class="record">Récord anterior: <span id="previousRecord" data-value="previous-record">-</span></p>
+            </div>
+            
+            <!-- Admin controls to securely update the counter. -->
+            <div class="admin-section" data-component="admin-panel">
+                <button id="adminBtn" class="admin-button">Administración</button>
+                
+                <div id="adminPanel" class="admin-panel hidden">
+                    <h3>Panel de administración</h3>
+                    <div class="form-group">
+                        <label for="passwordInput">Contraseña:</label>
+                        <input type="password" id="passwordInput" placeholder="Ingrese la clave">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="previousRecordInput">Récord anterior (opcional):</label>
+                        <input type="number" id="previousRecordInput" min="0" placeholder="Récord anterior">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="daysInput">Nuevo valor de días:</label>
+                        <input type="number" id="daysInput" min="0" placeholder="Número de días">
+                    </div>
+                    
+                    <div class="button-group">
+                        <button id="updateBtn" class="update-button">Actualizar</button>
+                    </div>
+                    
+                    <div id="message" class="message"></div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <!-- Extra app details hidden to avoid clutter. -->
+            <div class="app-info" data-info="application-details" style="display: none;">
+                Application: Días sin accidentes - Ecolab (Days without accidents)
+                Purpose: Workplace safety tracking
+                Type: Accident counter
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Main JS for data sync and interactions. -->
+    <script src="script.js"></script>
+</body>
+</html> 
