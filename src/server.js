@@ -14,6 +14,7 @@ const DATA_FILE_PATH = process.env.DATA_FILE_PATH || path.join(__dirname, '..', 
 process.env.DATA_FILE_PATH = DATA_FILE_PATH;
 
 const { ensureDailyIncrement, loadData } = require('../lib/counter');
+const { ChileMidnightScheduler } = require('../lib/scheduler');
 
 const app = express();
 const DATA_FILE = DATA_FILE_PATH;
@@ -112,6 +113,7 @@ app.get('/', (req, res) => {
 const CERT_PATH = process.env.CERT_PATH || undefined;
 const KEY_PATH = process.env.KEY_PATH || undefined;
 const CA_PATH = process.env.CA_PATH || undefined;
+const allowHttpInProd = process.env.ALLOW_HTTP_IN_PRODUCTION === '1';
 const useHttps = Boolean(CERT_PATH && KEY_PATH);
 
 let PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4443;
@@ -148,7 +150,7 @@ if (useHttps) {
         process.exit(1);
     }
 } else {
-    if (process.env.NODE_ENV === 'production') { console.error('❌ Missing CERT_PATH/KEY_PATH in production. Set them or run in dev mode.'); process.exit(1); }
+    if (process.env.NODE_ENV === 'production' && !allowHttpInProd) { console.error('❌ Missing CERT_PATH/KEY_PATH in production. Set them or set ALLOW_HTTP_IN_PRODUCTION=1 to run behind a reverse proxy.'); process.exit(1); }
     app.listen(PORT, '0.0.0.0', serverCallback);
     console.warn('⚠️  Certificate files not provided. Running HTTP for local development.');
 }
@@ -161,6 +163,20 @@ process.on('SIGINT', () => makeBackupAndExit('SIGINT'));
 process.on('SIGTERM', () => makeBackupAndExit('SIGTERM'));
 
 module.exports = app;
+
+// Start daily scheduler to auto-increment at Chile midnight
+try {
+    const scheduler = new ChileMidnightScheduler(async () => {
+        const { incrementsApplied } = await ensureDailyIncrement();
+        if (incrementsApplied > 0) {
+            console.log(`🗓️  Daily rollover applied: +${incrementsApplied} día(s).`);
+        }
+    });
+    scheduler.start();
+    console.log('⏱️  Chile midnight scheduler started.');
+} catch (err) {
+    console.error('❌ Failed to start scheduler:', err);
+}
 
 
 

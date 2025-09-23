@@ -73,6 +73,10 @@ async function ensureDailyIncrement(nowDate) {
     if (!data.lastRunChileDate) {
         data.lastRunChileDate = todayClISO;
         data.ultimaActualizacion = new Date().toISOString();
+        // Ensure record is initialized if absent
+        if (data.recordAnterior === null || data.recordAnterior === undefined) {
+            data.recordAnterior = data.diasSinAccidentes;
+        }
         await saveData(data);
         return { data, incrementsApplied };
     }
@@ -82,8 +86,26 @@ async function ensureDailyIncrement(nowDate) {
         data.diasSinAccidentes += daysToAdd;
         data.lastRunChileDate = todayClISO;
         data.ultimaActualizacion = new Date().toISOString();
+        // Auto-update record when a new max is reached
+        if (
+            data.recordAnterior === null ||
+            data.recordAnterior === undefined ||
+            data.diasSinAccidentes > data.recordAnterior
+        ) {
+            data.recordAnterior = data.diasSinAccidentes;
+        }
         await saveData(data);
         incrementsApplied = daysToAdd;
+    }
+
+    // Even if no increment occurred, ensure record reflects the current max
+    if (
+        data.recordAnterior === null ||
+        data.recordAnterior === undefined ||
+        data.diasSinAccidentes > data.recordAnterior
+    ) {
+        data.recordAnterior = data.diasSinAccidentes;
+        await saveData(data);
     }
 
     return { data, incrementsApplied };
