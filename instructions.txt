@@ -1,55 +1,113 @@
-Consider the following keywords:
+Introduction. 
 
-Days without accidents
+You are building software for a company called Optoelectronica Icalma.
 
-Idempotency
+Optoelectronica Icalma is serving Ecolab a solution to replace their physical days without accident board with a digital board.
 
-Santiago de Chile time zone
+Ecolab has admin access to a webapp with accident values. Ecolab can update if needed. Call the webapp "Días sin accidentes". 
 
-Daily rollover at midnight
+A computer embedded in the digital board continuously reads "Días sin accidentes". And showcases with large led numbers.
 
-Working URL check
+Build, host, and develop the "Días sin accidentes" server.
 
-Persistence
+Body. 
 
-Data model
+Consider this UI.
 
-daysWithoutIncidents
+Showcase two large numbers: "Días sin accidentes" and "Récord". Showcase, small, the last update "Última actualización".
 
-lastReload
+Add button "Administración". Leading to a simple panel requesting for a password. Once entered, user can change both the "Récord" and "Días sin accidentes". Default pass is "jefecito".
 
-API
+╭────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                        │
+│     ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░     │
+│   ░                                                                                  ░   │
+│  ░                                                                                    ░  │
+│ ░                                                                                      ░ │
+│ ░                          Días sin accidentes                                         ░ │
+│ ░                                                                                    ░ │
+│ ░      ┌───────────────────────────────────────────────────────────────────────┐     ░ │
+│ ░      │                                                                       │     ░ │
+│ ░      │                                                                       │     ░ │
+│ ░      │        ╭───────────────────────────────────────────────────────╮      │     ░ │
+│ ░      │        │                                                       │      │     ░ │
+│ ░      │        │                                                       │      │     ░ │
+│ ░      │        │                 128                                   │      │     ░ │
+│ ░      │        │                 días                                  │      │     ░ │
+│ ░      │        │                                                       │      │     ░ │
+│ ░      │        │                                                       │      │     ░ │
+│ ░      │        ╰───────────────────────────────────────────────────────╯      │     ░ │
+│ ░      │                                                                       │     ░ │
+│ ░      │                                Última actualización: 25/09/2025 09:42 │     ░ │
+│ ░      │                                                                       │     ░ │
+│ ░      └───────────────────────────────────────────────────────────────────────┘     ░ │
+│ ░                                                                                    ░ │
+│ ░                Récord anterior                                                  ░ │
+│ ░                                                                                    ░ │
+│ ░                   ┌───────────────────────────┐    ┌─────────────────────────┐      ░ │
+│ ░                   │                           │    │                         │      ░ │
+│ ░                   │        200                │    │  [ Administracion ]     │      ░ │
+│ ░                   │        días               │    │                         │      ░ │
+│ ░                   │                           │    └─────────────────────────┘      ░ │
+│ ░                   └───────────────────────────┘                                   ░ │
+│ ░                                                                                    ░ │
+│ ░  ╭──────────────────────────────────────────────────────────────────────────────╮  ░ │
+│ ░  │                                                                              │  ░ │
+│ ░  │  ┌───────────────────────┐   ┌──────────────────────────────┐               │  ░ │
+│ ░  │  │ Contraseña:           │   │ Récord anterior (opcional): │               │  ░ │
+│ ░  │  │ [••••••••••••••••••]  │   │ [       200       ]          │               │  ░ │
+│ ░  │  └───────────────────────┘   └──────────────────────────────┘               │  ░ │
+│ ░  │                                                                              │  ░ │
+│ ░  │  ┌──────────────────────────────────────────────────────────────────────┐   │  ░ │
+│ ░  │  │ Nuevo valor de días:  [   128   ]                                      │   │  ░ │
+│ ░  │  └──────────────────────────────────────────────────────────────────────┘   │  ░ │
+│ ░  │                                                                              │  ░ │
+│ ░  │      [ Actualizar ]    [ Cerrar panel ]    [ Reiniciar a 0 ]                │  ░ │
+│ ░  │                                                                              │  ░ │
+│ ░  ╰──────────────────────────────────────────────────────────────────────────────╯  ░ │
+│ ░                                                                                  ░ │
+│  ░                                                                                 ░  │
+│   ░                                                                                ░   │
+│     ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░     │
+│                                                                                        │
+╰────────────────────────────────────────────────────────────────────────────────────────╯
 
-Password
+Consider this backend. 
 
-Input validation
+Allow the public internet to securely connect to several instances of "Días sin accidentes".
 
-Spanish UI
+Host this application in a local server inside a house. Consider Xfinity internet provider restrictions on port exposure. The house uses a Harris router. 
 
-Resilience
+Use DDNS to achieve URL https://dias-sin-accidentes.optoelectronica.cl.
 
-Secrets
+Optoelectronica contracts CPanel. Cpanel provides DDNS SSL certificates including: Certificate,  Private key, Certificate authority bundle, and webcall URL.
 
-Port
+Use a reverse proxy to host several instances: 
 
-Error
+https://ensayo-dias-sin-accidentes.optoelectronica.cl. 
 
-Logs
+https://ecolab.optoelectronica.cl.
 
-Testing
+Design a test pipeline for developing new features. Host in the "ensayo" URL. 
 
-Deployment
+If test pipeline is approved, push to production. 
 
-Backups
+"Días sin accidentes" must increase once the day is over.
 
-Create a counter that auto-increments once per day. Santiago de Chile time. Available as a website. Updated by users who know the password.
+"Récord" should not automatically update. The user is to change it. 
 
-This repo contains several legacy files. To minimize clutter, you can remove the following tracked files now that the app was reorganized:
+Include an API. All API functions pass tests. Like password allows user to change values. 
 
-- `server.js` (moved to `src/server.js`)
-- `index.html` (moved to `public/index.html`)
-- `script.js` (moved to `public/script.js`)
-- `styles.css` (moved to `public/styles.css`)
-- `entrypoint.sh` (optional; used by older Docker image)
+Set time zone of "Santiago de Chile".
 
-Delete them only after confirming `src/` and `public/` versions work.
+Values are reachable by computers. 
+
+Prepare for outages. Including restarts, and connectivity problems.  If the server or the internet restarts, app restarts too.
+
+Containerize.
+
+Track usage. Perhaps clicks in the app, data transmission, or API calls. 
+
+Check all these instructions are developed. Ask yourself, is this part lean enough? Is this part future proof? 
+
+Run from concept to implementation. Don't stop, as you are working while we are not looking. We can't babysit you. 
