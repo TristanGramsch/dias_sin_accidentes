@@ -25,6 +25,31 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+// --- Usage logging (JSON lines) ---
+const LOG_DIR = path.join(__dirname, "..", "logs");
+const USAGE_LOG = path.join(LOG_DIR, "usage.log");
+try { if (!fsSync.existsSync(LOG_DIR)) { fsSync.mkdirSync(LOG_DIR, { recursive: true }); } } catch (e) { console.error("Failed to ensure logs directory", e); }
+
+function appendUsage(event, meta) {
+    try {
+        const entry = { ts: new Date().toISOString(), event, ...meta };
+        fsSync.appendFileSync(USAGE_LOG, JSON.stringify(entry) + "\n");
+    } catch (e) {
+        // Best-effort logging; do not crash.
+    }
+}
+
+// Request logging (avoid sensitive data)
+app.use((req, res, next) => {
+    const started = Date.now();
+    const meta = { method: req.method, path: req.path, ip: req.ip || req.connection?.remoteAddress };
+    res.on("finish", () => {
+        appendUsage("http_request", { ...meta, status: res.statusCode, ms: Date.now() - started });
+    });
+    next();
+});
+
+
 function requirePassword(req, res) {
     const { password } = req.body || {};
     if (!password || password !== ADMIN_PASSWORD) {
@@ -75,6 +100,7 @@ app.post('/api/counter/update', async (req, res) => {
         const success = await saveData(data);
 
         if (success) {
+            appendUsage("admin_update", { path: "/api/counter/update", ip: req.ip || req.connection?.remoteAddress, oldDays, newDays, recordProvided: req.body.recordAnterior !== undefined });
             res.json({ success: true, message: `Días actualizados de ${oldDays} a ${newDays}`, data: { diasSinAccidentes: data.diasSinAccidentes, ultimaActualizacion: data.ultimaActualizacion, ultimaActualizacionFormatted: formatChile(new Date(data.ultimaActualizacion)), recordAnterior: data.recordAnterior ?? null } });
         } else {
             res.status(500).json({ success: false, message: 'Error al guardar los datos' });
@@ -97,6 +123,8 @@ app.post('/api/counter/reset', async (req, res) => {
         const success = await saveData(data);
 
         if (success) {
+            appendUsage("admin_update", { path: "/api/counter/update", ip: req.ip || req.connection?.remoteAddress, oldDays, newDays, recordProvided: req.body.recordAnterior !== undefined });
+            appendUsage("admin_reset", { path: "/api/counter/reset", ip: req.ip || req.connection?.remoteAddress, oldDays });
             res.json({ success: true, message: `Contador reiniciado desde ${oldDays} días`, data: { diasSinAccidentes: data.diasSinAccidentes, ultimaActualizacion: data.ultimaActualizacion, ultimaActualizacionFormatted: formatChile(new Date(data.ultimaActualizacion)) } });
         } else {
             res.status(500).json({ success: false, message: 'Error al guardar los datos' });

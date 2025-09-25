@@ -1,5 +1,5 @@
 {
-  "name": "dias-sin-accidentes",
+  "name": "ensayo-dias-sin-accidentes",
   "version": "1.0.0",
   "description": "Node.js application to track days without incidents - Docker ready for port 443 deployment",
   "main": "src/server.js",
@@ -8,11 +8,13 @@
     "dev": "nodemon src/server.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "docker:build": "docker build -t dias-sin-accidentes .",
-    "docker:run": "docker run -d --name dias-counter -p 4443:4443 --restart unless-stopped dias-sin-accidentes",
-    "docker:stop": "docker stop dias-counter",
-    "docker:logs": "docker logs dias-counter",
-    "docker:update": "npm run docker:stop && docker rm dias-counter && npm run docker:build && npm run docker:run"
+    "docker:build": "docker build -t ensayo-dias-sin-accidentes .",
+    "docker:run": "docker run -d --name ensayo-ensayo-dias-counter -p 4443:4443 --restart unless-stopped ensayo-dias-sin-accidentes",
+    "docker:stop": "docker stop ensayo-dias-counter",
+    "docker:logs": "docker logs ensayo-dias-counter",
+    "docker:update": "npm run docker:stop && docker rm ensayo-dias-counter && npm run docker:build && npm run docker:run",
+    "test:e2e": "./test/e2e.sh",
+    "test:pipeline": "./test/test-pipeline.sh"
   },
   "keywords": [
     "safety",

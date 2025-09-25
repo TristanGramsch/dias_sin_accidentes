@@ -22,8 +22,8 @@ show_help() {
     echo "  help          - Show this help message"
     echo ""
     echo "Public URLs:"
-    echo "  Production:  https://dias-sin-accidentes.optoelectronica.cl"
-    echo "  Development: https://ensayo-dias-sin-accidentes.optoelectronica.cl"
+    echo "  Production:  https://ensayo-dias-sin-accidentes.optoelectronica.cl"
+    echo "  Development: https://ensayo-ensayo-dias-sin-accidentes.optoelectronica.cl"
 }
 
 case "$1" in
@@ -90,10 +90,10 @@ case "$1" in
         echo ""
         echo "=== Testing Reverse Proxy (if DNS is configured) ==="
         echo "Development via reverse proxy:"
-        curl -s -k https://ensayo-dias-sin-accidentes.optoelectronica.cl/api/counter 2>/dev/null | head -c 100
+        curl -s -k https://ensayo-ensayo-dias-sin-accidentes.optoelectronica.cl/api/counter 2>/dev/null | head -c 100
         echo ""
         echo "Production via reverse proxy:"
-        curl -s -k https://dias-sin-accidentes.optoelectronica.cl/api/counter 2>/dev/null | head -c 100
+        curl -s -k https://ensayo-dias-sin-accidentes.optoelectronica.cl/api/counter 2>/dev/null | head -c 100
         echo ""
         ;;
     

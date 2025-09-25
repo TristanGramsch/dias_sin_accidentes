@@ -1,55 +1,90 @@
-Consider the following keywords:
+Build, host, and develop a server that allows the public internet to securely connect to several instances of a web app. "Días sin accidentes".
 
-Days without accidents
+UI.
 
-Idempotency
+"Días sin accidentes" showcases two large numbers. One represents the "Días sin accidentes" of a company. The other represents the "Récord" for that company, that is, the highest number of days without accidents. Add a small text for last update "Última actualización".
 
-Santiago de Chile time zone
+There's another button in this web application, "Administración". This button leads you to a simple panel that allows you to enter a password. Once you enter the password, you can change both the record and the days without accident. Default pass is "jefecito".
 
-Daily rollover at midnight
+Backend. 
 
-Working URL check
+Host this application in a local server inside your house. You will have to consider the restrictions that your internet provider puts on port exposure, and you're going to be working with a Harris router. 
 
-Persistence
+Deploy this web page in an HTTPS direction URL that allows everyone to enter. Use DDNS such that you have the structure of HTTPS://webapplication.optoelectronica.cl. Optoelectronica is the name of the company that is building this software.
 
-Data model
+Optoelectronica uses CPanel. Cpanel provides DDNS with an SSL certificate. Including: Certificate,  Private key, Certificate authority bundle, and webcall URL.
 
-daysWithoutIncidents
+Use a reverse proxy to host several instances reachable with different urls. As HTTPS://test-webapplication.optoelectronica.cl. HTTPS://prod-webapplication.optoelectronica.cl.
 
-lastReload
+"Días sin accidentes" must increase once the day is over.
 
-API
+"Récord" should not automatically update. The user is to change it. 
 
-Password
+Have this application to be in the time zone of "Santiago de Chile".
 
-Input validation
+The data of this application will be used by another computer. "Días sin accidentes" and "Récord" must be reachable by computers connecting to this URL. 
 
-Spanish UI
+A single data file stored locally as a json tracks the current state of data. In case of outage. 
 
-Resilience
+If the server restarts, app restarts too.
 
-Secrets
+If internet goes out and back, the app is resilient.    
 
-Port
+An API is included. 
 
-Error
+Design a test pipeline for developing new features. Once this pipeline passes tests, push to production. Tests include: HTTPS enabled; "Días sin accidentes" and "Récord" numbers are shown on the app; password works to change numbers.
 
-Logs
+Track usage. Perhaps clicks in the app, data transmission, or API calls. 
 
-Testing
 
-Deployment
+General.
 
-Backups
+The phrase "Récord anterior" appears exactly once in the main application display. In the administration panel, this value is labeled as "Récord anterior (opcional)" to maintain consistency while avoiding duplication.
 
-Create a counter that auto-increments once per day. Santiago de Chile time. Available as a website. Updated by users who know the password.
+"Récord anterior" does not update automatically. Only a person with the administration password can change it through the administration panel.
 
-This repo contains several legacy files. To minimize clutter, you can remove the following tracked files now that the app was reorganized:
+The system maintains a local usage log that records:
+- API requests and responses (without sensitive data like passwords)
+- Administrative changes including old and new values
+- Request timing and client information
+- System events and errors
 
-- `server.js` (moved to `src/server.js`)
-- `index.html` (moved to `public/index.html`)
-- `script.js` (moved to `public/script.js`)
-- `styles.css` (moved to `public/styles.css`)
-- `entrypoint.sh` (optional; used by older Docker image)
+Before deploying changes to production, a test process must be completed successfully. The test pipeline includes:
+- Unit tests for core functionality
+- End-to-end tests verifying HTTPS connectivity to public addresses
+- Verification that the application displays both main numbers ("Días sin accidentes" and "Récord anterior")
+- Confirmation that the administration password correctly allows value changes
+- Read-only verification of production environment integrity
 
-Delete them only after confirming `src/` and `public/` versions work.
+The service automatically restarts if the server reboots through systemd configuration. If internet connectivity is lost and restored, the service continues operating and public addresses are maintained through DDNS updates.
+
+Public addresses for multiple instances follow the naming convention:
+- Production: dias-sin-accidentes.optoelectronica.cl
+- Testing: ensayo-dias-sin-accidentes.optoelectronica.cl  
+- Client instances: [client-name].optoelectronica.cl
+
+Environment requirements.
+
+Configure the router to forward ports 80 and 443 to the local reverse proxy server.
+
+Use DDNS services to maintain current public IP address mappings for all configured domains.
+
+SSL certificates must include the complete certificate chain: certificate file, private key file, and certificate authority bundle file.
+
+The reverse proxy handles SSL termination and routes requests to appropriate application instances based on domain names.
+
+All data persistence uses local JSON files with automatic backup creation during graceful shutdowns.
+
+The application timezone is configured for America/Santiago to ensure accurate daily increments at Chile midnight.
+
+
+Development notes.
+
+When testing from the same local network as the hosting server, external domain names (like dias-sin-accidentes.optoelectronica.cl) may not be accessible due to router NAT hairpinning limitations. In this case:
+
+- Use the local IP address and port for testing: https://192.168.0.21:3001 (ensayo), https://192.168.0.21:3002 (producción)  
+- External testing should be done from a different network (mobile data, different WiFi)
+- The E2E test scripts are designed to run from external networks where the public domains are accessible
+
+For local development and testing, the services can be accessed directly via their local ports, but SSL certificate validation may fail since certificates are issued for the public domain names, not local IP addresses.
+
