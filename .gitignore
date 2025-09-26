@@ -10,3 +10,7 @@ ddns-update.log
 data/*.json
 *.bak.*
 backups/
+node_modules/
+instances/*/node_modules/
+Certs/
+instances/*/Certs/
