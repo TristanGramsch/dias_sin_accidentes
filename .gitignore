@@ -1,16 +1,14 @@
-# Ignore runtime data and logs
-logs/usage.log
-ddns-update.log
-data/*.json
-*.bak.*
-backups/
-# Ignore runtime data and logs
-logs/usage.log
-ddns-update.log
-data/*.json
-*.bak.*
-backups/
+# Node dependencies
 node_modules/
-instances/*/node_modules/
-Certs/
-instances/*/Certs/
+
+# Runtime data and backups
+data/*.json
+*.bak.*
+logs/
+ddns-update.log
+backups/
+
+# Secrets (TLS material)
+Certs/**/*.pem
+Certs/**/*.crt
+Certs/**/*.key
