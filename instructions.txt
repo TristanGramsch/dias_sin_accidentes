@@ -1,90 +1,125 @@
-Build, host, and develop a server that allows the public internet to securely connect to several instances of a web app. "Días sin accidentes".
+Introduction. 
 
-UI.
+You are building software for a company called Optoelectronica Icalma.
 
-"Días sin accidentes" showcases two large numbers. One represents the "Días sin accidentes" of a company. The other represents the "Récord" for that company, that is, the highest number of days without accidents. Add a small text for last update "Última actualización".
+Optoelectronica Icalma is serving Ecolab a solution to replace their physical days without accident board with a digital board.
 
-There's another button in this web application, "Administración". This button leads you to a simple panel that allows you to enter a password. Once you enter the password, you can change both the record and the days without accident. Default pass is "jefecito".
+Ecolab has admin access to a webapp with accident values. Ecolab can update if needed. Call the webapp "Días sin accidentes". 
 
-Backend. 
+A computer embedded in the digital board continuously reads "Días sin accidentes". And showcases with large led numbers.
 
-Host this application in a local server inside your house. You will have to consider the restrictions that your internet provider puts on port exposure, and you're going to be working with a Harris router. 
+Build, host, and develop the "Días sin accidentes" server.
 
-Deploy this web page in an HTTPS direction URL that allows everyone to enter. Use DDNS such that you have the structure of HTTPS://webapplication.optoelectronica.cl. Optoelectronica is the name of the company that is building this software.
+Body. 
 
-Optoelectronica uses CPanel. Cpanel provides DDNS with an SSL certificate. Including: Certificate,  Private key, Certificate authority bundle, and webcall URL.
+Consider this UI.
 
-Use a reverse proxy to host several instances reachable with different urls. As HTTPS://test-webapplication.optoelectronica.cl. HTTPS://prod-webapplication.optoelectronica.cl.
+Showcase two large numbers: "Días sin accidentes" and "Récord". Showcase, small, the last update "Última actualización".
+
+Add button "Administración". Leading to a simple panel requesting for a password. Once entered, user can change both the "Récord" and "Días sin accidentes". Default pass is "jefecito".
+
+╭────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                        │
+│     ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░     │
+│   ░                                                                                  ░   │
+│  ░                                                                                    ░  │
+│ ░                                                                                      ░ │
+│ ░                          Días sin accidentes                                         ░ │
+│ ░                                                                                    ░ │
+│ ░      ┌───────────────────────────────────────────────────────────────────────┐     ░ │
+│ ░      │                                                                       │     ░ │
+│ ░      │                                                                       │     ░ │
+│ ░      │        ╭───────────────────────────────────────────────────────╮      │     ░ │
+│ ░      │        │                                                       │      │     ░ │
+│ ░      │        │                                                       │      │     ░ │
+│ ░      │        │                 128                                   │      │     ░ │
+│ ░      │        │                 días                                  │      │     ░ │
+│ ░      │        │                                                       │      │     ░ │
+│ ░      │        │                                                       │      │     ░ │
+│ ░      │        ╰───────────────────────────────────────────────────────╯      │     ░ │
+│ ░      │                                                                       │     ░ │
+│ ░      │                                Última actualización: 25/09/2025 09:42 │     ░ │
+│ ░      │                                                                       │     ░ │
+│ ░      └───────────────────────────────────────────────────────────────────────┘     ░ │
+│ ░                                                                                    ░ │
+│ ░                Récord anterior                                                  ░ │
+│ ░                                                                                    ░ │
+│ ░                   ┌───────────────────────────┐    ┌─────────────────────────┐      ░ │
+│ ░                   │                           │    │                         │      ░ │
+│ ░                   │        200                │    │  [ Administracion ]     │      ░ │
+│ ░                   │        días               │    │                         │      ░ │
+│ ░                   │                           │    └─────────────────────────┘      ░ │
+│ ░                   └───────────────────────────┘                                   ░ │
+│ ░                                                                                    ░ │
+│ ░  ╭──────────────────────────────────────────────────────────────────────────────╮  ░ │
+│ ░  │                                                                              │  ░ │
+│ ░  │  ┌───────────────────────┐   ┌──────────────────────────────┐               │  ░ │
+│ ░  │  │ Contraseña:           │   │ Récord anterior (opcional): │               │  ░ │
+│ ░  │  │ [••••••••••••••••••]  │   │ [       200       ]          │               │  ░ │
+│ ░  │  └───────────────────────┘   └──────────────────────────────┘               │  ░ │
+│ ░  │                                                                              │  ░ │
+│ ░  │  ┌──────────────────────────────────────────────────────────────────────┐   │  ░ │
+│ ░  │  │ Nuevo valor de días:  [   128   ]                                      │   │  ░ │
+│ ░  │  └──────────────────────────────────────────────────────────────────────┘   │  ░ │
+│ ░  │                                                                              │  ░ │
+│ ░  │      [ Actualizar ]    [ Cerrar panel ]    [ Reiniciar a 0 ]                │  ░ │
+│ ░  │                                                                              │  ░ │
+│ ░  ╰──────────────────────────────────────────────────────────────────────────────╯  ░ │
+│ ░                                                                                  ░ │
+│  ░                                                                                 ░  │
+│   ░                                                                                ░   │
+│     ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░     │
+│                                                                                        │
+╰────────────────────────────────────────────────────────────────────────────────────────╯
+
+Consider this backend. 
+
+Allow the public internet to securely connect to several instances of "Días sin accidentes".
+
+Host this application in a local server inside a house. Consider Xfinity internet provider restrictions on port exposure. The house uses a Harris router. 
+
+Optoelectronica contracts CPanel. Cpanel provides DDNS SSL certificates including: Certificate,  Private key, Certificate authority bundle, and webcall URL.
+
+Use DDNS to achieve URL https://dias-sin-accidentes.optoelectronica.cl.
+
+Use a reverse proxy to host several instances: 
+
+https://ensayo-dias-sin-accidentes.optoelectronica.cl. 
+
+https://ecolab.optoelectronica.cl.
+
+Design a test pipeline for developing new features. Host in the 'ensayo-dias' URL. 
+
+If test pipeline is approved, push to production 'dias' URL. 
+
+'ecolab' URL is production + a company logo. 
+
+Each URL is produced by a branch. 
+
+One big credentials folder at root. Untracked. 
+
+Consider an API. 
+
+Consider tests. 
+
+Password allows admins to change values. 
 
 "Días sin accidentes" must increase once the day is over.
 
 "Récord" should not automatically update. The user is to change it. 
 
-Have this application to be in the time zone of "Santiago de Chile".
+Time zone set to "Santiago de Chile".
 
-The data of this application will be used by another computer. "Días sin accidentes" and "Récord" must be reachable by computers connecting to this URL. 
+Values are reachable by computers. 
 
-A single data file stored locally as a json tracks the current state of data. In case of outage. 
+Prepare for outages. Including restarts and connectivity problems.  If the server or the internet restarts, app restarts too.
 
-If the server restarts, app restarts too.
-
-If internet goes out and back, the app is resilient.    
-
-An API is included. 
-
-Design a test pipeline for developing new features. Once this pipeline passes tests, push to production. Tests include: HTTPS enabled; "Días sin accidentes" and "Récord" numbers are shown on the app; password works to change numbers.
+Containerize.
 
 Track usage. Perhaps clicks in the app, data transmission, or API calls. 
 
+Other
 
-General.
+Check all these instructions are developed. Ask yourself, is this part lean enough? Is this part future proof? 
 
-The phrase "Récord anterior" appears exactly once in the main application display. In the administration panel, this value is labeled as "Récord anterior (opcional)" to maintain consistency while avoiding duplication.
-
-"Récord anterior" does not update automatically. Only a person with the administration password can change it through the administration panel.
-
-The system maintains a local usage log that records:
-- API requests and responses (without sensitive data like passwords)
-- Administrative changes including old and new values
-- Request timing and client information
-- System events and errors
-
-Before deploying changes to production, a test process must be completed successfully. The test pipeline includes:
-- Unit tests for core functionality
-- End-to-end tests verifying HTTPS connectivity to public addresses
-- Verification that the application displays both main numbers ("Días sin accidentes" and "Récord anterior")
-- Confirmation that the administration password correctly allows value changes
-- Read-only verification of production environment integrity
-
-The service automatically restarts if the server reboots through systemd configuration. If internet connectivity is lost and restored, the service continues operating and public addresses are maintained through DDNS updates.
-
-Public addresses for multiple instances follow the naming convention:
-- Production: dias-sin-accidentes.optoelectronica.cl
-- Testing: ensayo-dias-sin-accidentes.optoelectronica.cl  
-- Client instances: [client-name].optoelectronica.cl
-
-Environment requirements.
-
-Configure the router to forward ports 80 and 443 to the local reverse proxy server.
-
-Use DDNS services to maintain current public IP address mappings for all configured domains.
-
-SSL certificates must include the complete certificate chain: certificate file, private key file, and certificate authority bundle file.
-
-The reverse proxy handles SSL termination and routes requests to appropriate application instances based on domain names.
-
-All data persistence uses local JSON files with automatic backup creation during graceful shutdowns.
-
-The application timezone is configured for America/Santiago to ensure accurate daily increments at Chile midnight.
-
-
-Development notes.
-
-When testing from the same local network as the hosting server, external domain names (like dias-sin-accidentes.optoelectronica.cl) may not be accessible due to router NAT hairpinning limitations. In this case:
-
-- Use the local IP address and port for testing: https://192.168.0.21:3001 (ensayo), https://192.168.0.21:3002 (producción)  
-- External testing should be done from a different network (mobile data, different WiFi)
-- The E2E test scripts are designed to run from external networks where the public domains are accessible
-
-For local development and testing, the services can be accessed directly via their local ports, but SSL certificate validation may fail since certificates are issued for the public domain names, not local IP addresses.
-
+Run from concept to implementation. Don't stop, as you are working while we are not looking. We can't babysit you. 

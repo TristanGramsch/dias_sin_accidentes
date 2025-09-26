@@ -1,0 +1,23 @@
+[Unit]
+Description=Días Sin Accidentes - Production
+After=network.target
+
+[Service]
+Type=simple
+User=tristan
+Group=tristan
+WorkingDirectory=/home/tristan/dias_sin_accidentes
+Environment=NODE_ENV=production
+Environment=PORT=3002
+Environment=ADMIN_PASSWORD=prod
+Environment=DATA_FILE_PATH=/home/tristan/dias_sin_accidentes/data/data.prod.json
+Environment=ALLOW_HTTP_IN_PRODUCTION=1
+ExecStart=/usr/bin/node src/server.js
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=dias-sin-accidentes-prod
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,23 @@
+[Unit]
+Description=Días Sin Accidentes - Development
+After=network.target
+
+[Service]
+Type=simple
+User=tristan
+Group=tristan
+WorkingDirectory=/home/tristan/dias_sin_accidentes
+Environment=NODE_ENV=development
+Environment=PORT=3001
+Environment=ADMIN_PASSWORD=dev
+Environment=DATA_FILE_PATH=/home/tristan/dias_sin_accidentes/data/data.test.json
+Environment=ALLOW_HTTP_IN_PRODUCTION=1
+ExecStart=/usr/bin/node src/server.js
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=dias-sin-accidentes-dev
+
+[Install]
+WantedBy=multi-user.target

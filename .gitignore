@@ -1,19 +1,14 @@
+# Node dependencies
 node_modules/
-data.json
-data.json.bak.*
-server.log
-server.pid
-/*.pem
-.env
-coverage/
-dist/
-/.idea/
-*.log
-node_modules
-npm-debug.log
-.env
-*.pem
-data.json
-entrypoint.sh
-# Not sure if this is wise
-package-lock.json
+
+# Runtime data and backups
+data/*.json
+*.bak.*
+logs/
+ddns-update.log
+backups/
+
+# Secrets (TLS material)
+Certs/**/*.pem
+Certs/**/*.crt
+Certs/**/*.key

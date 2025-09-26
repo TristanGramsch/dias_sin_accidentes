@@ -5,8 +5,13 @@ const { DateTime } = require("luxon");
 const CHILE_TZ = "America/Santiago";
 
 function getChileNow(fromDate) {
-    const base = fromDate instanceof Date ? DateTime.fromJSDate(fromDate) : DateTime.now();
-    return base.setZone(CHILE_TZ);
+    if (fromDate instanceof Date) {
+        return DateTime.fromJSDate(fromDate, { zone: CHILE_TZ });
+    }
+    if (fromDate && typeof fromDate === 'object' && typeof fromDate.toJSDate === 'function') {
+        return DateTime.fromJSDate(fromDate.toJSDate(), { zone: CHILE_TZ });
+    }
+    return DateTime.now().setZone(CHILE_TZ);
 }
 
 function getChileTodayISODate(fromDate) {
