@@ -29,7 +29,7 @@ show_help() {
 case "$1" in
     status)
         echo "=== Service Status ==="
-        sudo systemctl status dias-accidentes-dev dias-accidentes-prod nginx --no-pager -l
+        sudo systemctl status dias-sin-accidentes-dev dias-sin-accidentes-prod nginx --no-pager -l
         echo ""
         echo "=== Listening Ports ==="
         sudo ss -tlnp | grep -E ':80|:443|:3001|:3002'
@@ -37,19 +37,19 @@ case "$1" in
     
     start)
         echo "Starting all services..."
-        sudo systemctl start dias-accidentes-dev dias-accidentes-prod nginx
+        sudo systemctl start dias-sin-accidentes-dev dias-sin-accidentes-prod nginx
         echo "Services started. Use '$0 status' to check."
         ;;
     
     stop)
         echo "Stopping all services..."
-        sudo systemctl stop dias-accidentes-dev dias-accidentes-prod
+        sudo systemctl stop dias-sin-accidentes-dev dias-sin-accidentes-prod
         echo "Services stopped."
         ;;
     
     restart)
         echo "Restarting all services..."
-        sudo systemctl restart dias-accidentes-dev dias-accidentes-prod
+        sudo systemctl restart dias-sin-accidentes-dev dias-sin-accidentes-prod
         sudo systemctl reload nginx
         echo "Services restarted."
         ;;
@@ -58,11 +58,11 @@ case "$1" in
         case "$2" in
             dev)
                 echo "=== Development Instance Logs ==="
-                sudo journalctl -u dias-accidentes-dev -f
+                sudo journalctl -u dias-sin-accidentes-dev -f
                 ;;
             prod)
                 echo "=== Production Instance Logs ==="
-                sudo journalctl -u dias-accidentes-prod -f
+                sudo journalctl -u dias-sin-accidentes-prod -f
                 ;;
             nginx)
                 echo "=== Nginx Logs ==="
@@ -71,9 +71,9 @@ case "$1" in
             *)
                 echo "=== All Service Logs (last 20 lines each) ==="
                 echo "--- Development ---"
-                sudo journalctl -u dias-accidentes-dev --no-pager -n 20
+                sudo journalctl -u dias-sin-accidentes-dev --no-pager -n 20
                 echo "--- Production ---"
-                sudo journalctl -u dias-accidentes-prod --no-pager -n 20
+                sudo journalctl -u dias-sin-accidentes-prod --no-pager -n 20
                 echo "--- Nginx ---"
                 sudo journalctl -u nginx --no-pager -n 10
                 ;;
@@ -103,9 +103,9 @@ case "$1" in
         mkdir -p "$BACKUP_DIR"
         
         echo "Creating backup in $BACKUP_DIR..."
-        cp "$SCRIPT_DIR/data.prod.json" "$BACKUP_DIR/" 2>/dev/null || echo "  Warning: data.prod.json not found"
-        cp "$SCRIPT_DIR/data.test.json" "$BACKUP_DIR/" 2>/dev/null || echo "  Warning: data.test.json not found"
-        cp "$SCRIPT_DIR/data.json" "$BACKUP_DIR/" 2>/dev/null || echo "  Warning: data.json not found"
+        cp "$SCRIPT_DIR/data/data.prod.json" "$BACKUP_DIR/" 2>/dev/null || echo "  Warning: data.prod.json not found"
+        cp "$SCRIPT_DIR/data/data.test.json" "$BACKUP_DIR/" 2>/dev/null || echo "  Warning: data.test.json not found"
+        cp "$SCRIPT_DIR/data/data.json" "$BACKUP_DIR/" 2>/dev/null || echo "  Warning: data.json not found"
         
         echo "Backup completed: $BACKUP_DIR"
         ;;

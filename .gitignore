@@ -1,19 +1,12 @@
-node_modules/
-data.json
-data.json.bak.*
-server.log
-server.pid
-/*.pem
-.env
-coverage/
-dist/
-/.idea/
-*.log
-node_modules
-npm-debug.log
-.env
-*.pem
-data.json
-entrypoint.sh
-# Not sure if this is wise
-package-lock.json
+# Ignore runtime data and logs
+logs/usage.log
+ddns-update.log
+data/*.json
+*.bak.*
+backups/
+# Ignore runtime data and logs
+logs/usage.log
+ddns-update.log
+data/*.json
+*.bak.*
+backups/

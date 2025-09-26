@@ -12,7 +12,11 @@
     "docker:run": "docker run -d --name dias-counter -p 4443:4443 --restart unless-stopped dias-sin-accidentes",
     "docker:stop": "docker stop dias-counter",
     "docker:logs": "docker logs dias-counter",
-    "docker:update": "npm run docker:stop && docker rm dias-counter && npm run docker:build && npm run docker:run"
+    "docker:update": "npm run docker:stop && docker rm dias-counter && npm run docker:build && npm run docker:run",
+    "docker:dev:up": "docker run -d --name dias-dev-counter -p 3001:4443 -e ADMIN_PASSWORD=dev -e DATA_FILE_PATH=/data/data.test.json -e PORT=4443 -v $(pwd)/data:/data:rw --restart unless-stopped ensayo-dias-sin-accidentes",
+    "docker:dev:down": "docker rm -f dias-dev-counter || true",
+    "docker:prod:up": "docker run -d --name dias-prod-counter -p 3002:4443 -e ADMIN_PASSWORD=prod -e DATA_FILE_PATH=/data/data.prod.json -e PORT=4443 -v $(pwd)/data:/data:rw --restart unless-stopped ensayo-dias-sin-accidentes",
+    "docker:prod:down": "docker rm -f dias-prod-counter || true"
   },
   "keywords": [
     "safety",

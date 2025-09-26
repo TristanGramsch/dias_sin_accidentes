@@ -9,7 +9,9 @@ Group=tristan
 WorkingDirectory=/home/tristan/dias_sin_accidentes
 Environment=NODE_ENV=production
 Environment=PORT=3002
-Environment=DATA_FILE_PATH=/home/tristan/dias_sin_accidentes/data.prod.json
+Environment=ADMIN_PASSWORD=prod
+Environment=ADMIN_PASSWORD=prod
+Environment=DATA_FILE_PATH=/home/tristan/dias_sin_accidentes/data/data.prod.json
 Environment=CERT_PATH=/home/tristan/dias_sin_accidentes/Certs/prod/Certificate.pem
 Environment=KEY_PATH=/home/tristan/dias_sin_accidentes/Certs/prod/Private-key.pem
 Environment=CA_PATH=/home/tristan/dias_sin_accidentes/Certs/prod/Certificate-authority-bundle.pem
