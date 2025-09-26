@@ -56,7 +56,7 @@ async function loadData() {
             lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
             // Populate previous record if present
             previousRecord = result.data.recordAnterior ?? null;
-            previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
+            if (previousRecordEl) previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
             // Also populate the large bubble display
             if (previousRecordLargeEl) {
                 previousRecordLargeEl.textContent = previousRecord !== null ? previousRecord : '-';
@@ -188,7 +188,7 @@ async function updateDays() {
         updateDisplay();
         lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
         previousRecord = result.data.recordAnterior ?? previousRecord;
-        previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
+        if (previousRecordEl) previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
         if (previousRecordLargeEl) previousRecordLargeEl.textContent = previousRecord !== null ? previousRecord : '-';
         showMessage(result.message, 'success');
         closeAdminPanel();
@@ -219,7 +219,7 @@ async function resetCounter() {
         updateDisplay();
         lastUpdate.textContent = result.data.ultimaActualizacionFormatted;
         previousRecord = result.data.recordAnterior ?? previousRecord;
-        previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
+        if (previousRecordEl) previousRecordEl.textContent = previousRecord !== null ? previousRecord : '-';
         if (previousRecordLargeEl) previousRecordLargeEl.textContent = previousRecord !== null ? previousRecord : '-';
         showMessage(result.message, 'success');
         closeAdminPanel();
