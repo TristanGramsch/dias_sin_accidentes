@@ -78,9 +78,9 @@ Allow the public internet to securely connect to several instances of "Días sin
 
 Host this application in a local server inside a house. Consider Xfinity internet provider restrictions on port exposure. The house uses a Harris router. 
 
-Use DDNS to achieve URL https://dias-sin-accidentes.optoelectronica.cl.
-
 Optoelectronica contracts CPanel. Cpanel provides DDNS SSL certificates including: Certificate,  Private key, Certificate authority bundle, and webcall URL.
+
+Use DDNS to achieve URL https://dias-sin-accidentes.optoelectronica.cl.
 
 Use a reverse proxy to host several instances: 
 
@@ -88,25 +88,37 @@ https://ensayo-dias-sin-accidentes.optoelectronica.cl.
 
 https://ecolab.optoelectronica.cl.
 
-Design a test pipeline for developing new features. Host in the "ensayo" URL. 
+Design a test pipeline for developing new features. Host in the 'ensayo-dias' URL. 
 
-If test pipeline is approved, push to production. 
+If test pipeline is approved, push to production 'dias' URL. 
+
+'ecolab' URL is production + a company logo. 
+
+Each URL is produced by a branch. 
+
+One big credentials folder at root. Untracked. 
+
+Consider an API. 
+
+Consider tests. 
+
+Password allows admins to change values. 
 
 "Días sin accidentes" must increase once the day is over.
 
 "Récord" should not automatically update. The user is to change it. 
 
-Include an API. All API functions pass tests. Like password allows user to change values. 
-
-Set time zone of "Santiago de Chile".
+Time zone set to "Santiago de Chile".
 
 Values are reachable by computers. 
 
-Prepare for outages. Including restarts, and connectivity problems.  If the server or the internet restarts, app restarts too.
+Prepare for outages. Including restarts and connectivity problems.  If the server or the internet restarts, app restarts too.
 
 Containerize.
 
 Track usage. Perhaps clicks in the app, data transmission, or API calls. 
+
+Other
 
 Check all these instructions are developed. Ask yourself, is this part lean enough? Is this part future proof? 
 
