@@ -1,6 +1,11 @@
 node_modules
 npm-debug.log
+data/
+logs/
+*.bak.*
+*.test.json
+ddns-update.log
+Certs/
 .git
 README.md
 .env
-data.json 

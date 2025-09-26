@@ -2,15 +2,16 @@ FROM node:18-slim
 
 WORKDIR /app
 
-# Copy source and package metadata
 COPY package*.json ./
-COPY . .
-
-# Install only production dependencies
 RUN npm ci --omit=dev
 
-# Expose HTTPS port
-EXPOSE 443
+COPY src ./src
+COPY public ./public
+COPY lib ./lib
 
-# Default command
-CMD ["node", "server.js"]
+ENV NODE_ENV=production \
+    PORT=4443
+
+EXPOSE 4443
+
+CMD ["node", "src/server.js"]

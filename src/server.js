@@ -10,16 +10,22 @@ const os = require('os');
 const { formatChile } = require('../lib/time');
 
 // Respect single env name DATA_FILE_PATH; fallback to project-root `data.json`.
-const DATA_FILE_PATH = process.env.DATA_FILE_PATH || path.join(__dirname, '..', 'data.json');
+const DATA_FILE_PATH = process.env.DATA_FILE_PATH || path.join(__dirname, '..', 'data', 'data.json');
 process.env.DATA_FILE_PATH = DATA_FILE_PATH;
 
-const { ensureDailyIncrement, loadData } = require('../lib/counter');
+const { ensureDailyIncrement, loadData, saveData } = require('../lib/counter');
 const { ChileMidnightScheduler } = require('../lib/scheduler');
 
 const app = express();
 const DATA_FILE = DATA_FILE_PATH;
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'jefecito';
+const DEFAULT_PASSWORD = 'jefecito';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || null;
+const DEV_PASSWORD = process.env.NODE_ENV !== 'production' ? (process.env.DEV_ADMIN_PASSWORD || 'dev') : null;
+
+const allowedPasswords = new Set([DEFAULT_PASSWORD]);
+if (ADMIN_PASSWORD) allowedPasswords.add(ADMIN_PASSWORD);
+if (DEV_PASSWORD) allowedPasswords.add(DEV_PASSWORD);
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -27,7 +33,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 
 function requirePassword(req, res) {
     const { password } = req.body || {};
-    if (!password || password !== ADMIN_PASSWORD) {
+    if (!password || !allowedPasswords.has(password)) {
         res.status(401).json({ success: false, message: 'Contraseña incorrecta' });
         return false;
     }
@@ -65,13 +71,14 @@ app.post('/api/counter/update', async (req, res) => {
         data.diasSinAccidentes = newDays;
         if (req.body.recordAnterior !== undefined) {
             const recordVal = parseInt(req.body.recordAnterior, 10);
-            data.recordAnterior = (!isNaN(recordVal) && recordVal >= 0) ? recordVal : data.recordAnterior ?? null;
+            if (!Number.isNaN(recordVal) && recordVal >= 0) {
+                data.recordAnterior = recordVal;
+            }
         }
         data.ultimaActualizacion = new Date().toISOString();
         const { getChileTodayISODate } = require('../lib/time');
         data.lastRunChileDate = getChileTodayISODate();
 
-        const { saveData } = require('../lib/counter');
         const success = await saveData(data);
 
         if (success) {
@@ -93,7 +100,6 @@ app.post('/api/counter/reset', async (req, res) => {
         data.ultimaActualizacion = new Date().toISOString();
         const { getChileTodayISODate } = require('../lib/time');
         data.lastRunChileDate = getChileTodayISODate();
-        const { saveData } = require('../lib/counter');
         const success = await saveData(data);
 
         if (success) {
