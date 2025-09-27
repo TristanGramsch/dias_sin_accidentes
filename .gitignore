@@ -7,8 +7,3 @@ data/*.json
 logs/
 ddns-update.log
 backups/
-
-# Secrets (TLS material)
-Certs/**/*.pem
-Certs/**/*.crt
-Certs/**/*.key
