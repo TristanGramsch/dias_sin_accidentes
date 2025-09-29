@@ -40,6 +40,10 @@
             <div class="app-identifier" data-title="Días sin accidentes" style="display: none;">
                 Días sin accidentes - Safety tracking application
             </div>
+            <div id="brandBar" class="brand-bar hidden">
+                <img id="brandLogo" alt="Logo" />
+                <span id="brandName"></span>
+            </div>
         </header>
         
         <main>
@@ -84,6 +88,8 @@
                     
                     <div class="button-group">
                         <button id="updateBtn" class="update-button">Actualizar</button>
+                        <button id="resetBtn" class="reset-button">Reiniciar a 0</button>
+                        <button id="closeBtn" class="cancel-button">Cerrar panel</button>
                     </div>
                     
                     <div id="message" class="message"></div>

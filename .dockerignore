@@ -9,3 +9,7 @@ Certs/
 .git
 README.md
 .env
+credentials/
+backups/
+systemd-services/
+nginx-config/

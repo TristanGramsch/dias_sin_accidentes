@@ -9,7 +9,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "docker:build": "docker build -f docker/Dockerfile -t dias-sin-accidentes:dev .",
-    "docker:run": "docker run -d --name dias-dev-counter -p 3001:4443 --env-file docker/.env.dev --restart unless-stopped dias-sin-accidentes:dev",
+    "docker:run": "docker run -d --name dias-dev-counter -p 3001:4443 --env-file docker/.env.dev --restart unless-stopped -v $PWD/data:/app/data -v $PWD/logs:/app/logs dias-sin-accidentes:dev",
     "docker:stop": "docker rm -f dias-dev-counter || true",
     "docker:logs": "docker logs -f dias-dev-counter",
     "docker:up": "npm run docker:build && npm run docker:run",

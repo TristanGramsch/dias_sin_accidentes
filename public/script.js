@@ -8,6 +8,8 @@ const adminPanel = document.getElementById('adminPanel');
 const passwordInput = document.getElementById('passwordInput');
 const daysInput = document.getElementById('daysInput');
 const updateBtn = document.getElementById('updateBtn');
+const resetBtn = document.getElementById('resetBtn');
+const closeBtn = document.getElementById('closeBtn');
 const message = document.getElementById('message');
 
 // In-memory state for counter and panel visibility.
@@ -269,6 +271,8 @@ function closeAdminPanel() {
 adminBtn.addEventListener('click', toggleAdminPanel);
 // Clicking the Update button submits the days to apply changes.
 updateBtn.addEventListener('click', updateDays);
+if (resetBtn) resetBtn.addEventListener('click', resetCounter);
+if (closeBtn) closeBtn.addEventListener('click', closeAdminPanel);
 
 // Enables Enter key interactions for faster input.
 // Pressing Enter in the password field submits if days are filled, otherwise focuses the days field.
@@ -308,6 +312,23 @@ async function showStats() {
 // Bootstraps the app when the DOM is ready.
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
+    // Load optional branding config
+    fetch('/api/config').then(r => r.json()).then(({ success, data }) => {
+        if (!success) return;
+        const bar = document.getElementById('brandBar');
+        const logo = document.getElementById('brandLogo');
+        const name = document.getElementById('brandName');
+        if (data.brandLogoUrl) {
+            logo.src = data.brandLogoUrl;
+            logo.classList.add('brand-logo');
+        }
+        if (data.brandName) {
+            name.textContent = data.brandName;
+        }
+        if (data.brandLogoUrl || data.brandName) {
+            bar.classList.remove('hidden');
+        }
+    }).catch(() => {});
     
     // Applies a smooth transition to the counter.
     dayCounter.style.transition = 'transform 0.2s ease';

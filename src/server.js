@@ -82,6 +82,16 @@ app.get('/api/counter', async (req, res) => {
     }
 });
 
+// Lightweight config endpoint for instance-specific branding and settings
+app.get('/api/config', (req, res) => {
+    const config = {
+        instance: process.env.INSTANCE_NAME || null,
+        brandName: process.env.BRAND_NAME || null,
+        brandLogoUrl: process.env.BRAND_LOGO_URL || null
+    };
+    res.json({ success: true, data: config });
+});
+
 app.post('/api/counter/update', async (req, res) => {
     try {
         if (!requirePassword(req, res)) return;
@@ -129,7 +139,6 @@ app.post('/api/counter/reset', async (req, res) => {
         const success = await saveData(data);
 
         if (success) {
-            appendUsage("admin_update", { path: "/api/counter/update", ip: req.ip || req.connection?.remoteAddress, oldDays, newDays, recordProvided: req.body.recordAnterior !== undefined });
             appendUsage("admin_reset", { path: "/api/counter/reset", ip: req.ip || req.connection?.remoteAddress, oldDays });
             res.json({ success: true, message: `Contador reiniciado desde ${oldDays} días`, data: { diasSinAccidentes: data.diasSinAccidentes, ultimaActualizacion: data.ultimaActualizacion, ultimaActualizacionFormatted: formatChile(new Date(data.ultimaActualizacion)) } });
         } else {
@@ -137,6 +146,23 @@ app.post('/api/counter/reset', async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error resetting counter', error: error.message });
+    }
+});
+
+// Optional tracking endpoint to record client-side events (no sensitive data)
+app.post('/api/track', (req, res) => {
+    try {
+        const { event, meta } = req.body || {};
+        if (typeof event !== 'string' || event.length === 0) {
+            return res.status(400).json({ success: false, message: 'Invalid event' });
+        }
+        const safeMeta = { ...(meta || {}) };
+        // Ensure no password or secrets are logged
+        if (safeMeta.password) delete safeMeta.password;
+        appendUsage(event, { ...safeMeta, ip: req.ip || req.connection?.remoteAddress });
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ success: false });
     }
 });
 
