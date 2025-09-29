@@ -1,0 +1,32 @@
+name: CI (Mock)
+
+on:
+  push:
+    branches: [ "ensayo", "main", "prod", "ecolab" ]
+  pull_request:
+    branches: [ "ensayo", "main", "prod", "ecolab" ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npx vitest run
+      - name: Archive artifacts (mock)
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp-static
+          path: public/
+  deploy-mock:
+    needs: build-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/ensayo' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prod' || github.ref == 'refs/heads/ecolab'
+    steps:
+      - run: |
+          echo "Mock deploy step. In production, this would SSH or call CPanel API to update containers and reload nginx."
+          echo "Branch: ${{ github.ref }}"
+

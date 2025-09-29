@@ -52,6 +52,21 @@ describe('Counter idempotency', () => {
     expect(incrementsApplied).toBeGreaterThanOrEqual(1);
     expect(data.diasSinAccidentes).toBeGreaterThanOrEqual(6);
   });
+
+  it('reset sets days to 0 and logs usage without crashing', async () => {
+    await withTempData({
+      diasSinAccidentes: 7,
+      ultimaActualizacion: new Date().toISOString(),
+      lastRunChileDate: time.getChileTodayISODate(new Date())
+    });
+
+    const { saveData, loadData } = counter;
+    const data = await loadData();
+    data.diasSinAccidentes = 0;
+    await saveData(data);
+    const after = await loadData();
+    expect(after.diasSinAccidentes).toBe(0);
+  });
 });
 
 

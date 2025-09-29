@@ -7,6 +7,9 @@ data/*.json
 logs/
 ddns-update.log
 backups/
+credentials/
+.env
+.env.*
 
 # Secrets (TLS material)
 Certs/**/*.pem

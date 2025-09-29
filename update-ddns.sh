@@ -3,8 +3,10 @@
 # DDNS Update Script for Optoelectronica domains
 # This script updates the dynamic DNS records for both production and development domains
 
-PROD_WEBCALL_URL="https://optoelectronica.cl/cpanelwebcall/dwujeciyrthnsiwmllejyajjpyjpgomy"
-LOG_FILE="/home/tristan/dias_sin_accidentes/ddns-update.log"
+# These are placeholders; provide real WebCall URLs via environment or credentials store
+PROD_WEBCALL_URL="${PROD_WEBCALL_URL:-https://cpanel-webcall-placeholder/prod}"
+DEV_WEBCALL_URL="${DEV_WEBCALL_URL:-https://cpanel-webcall-placeholder/dev}"
+LOG_FILE="${LOG_FILE:-/var/log/dias-sin-accidentes/ddns-update.log}"
 
 # Function to log messages with timestamp
 log_message() {
@@ -41,8 +43,7 @@ update_ddns() {
 # Update production domain (dias-sin-accidentes.optoelectronica.cl)
 update_ddns "$PROD_WEBCALL_URL" "PRODUCTION"
 
-# Note: Add development domain webcall URL here when available
-# DEV_WEBCALL_URL="https://optoelectronica.cl/cpanelwebcall/[dev-webcall-id]"
-# update_ddns "$DEV_WEBCALL_URL" "DEVELOPMENT"
+# Development domain (ensayo-dias-sin-accidentes.optoelectronica.cl)
+update_ddns "$DEV_WEBCALL_URL" "DEVELOPMENT"
 
 log_message "DDNS update cycle completed"
