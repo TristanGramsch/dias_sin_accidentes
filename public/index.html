@@ -35,6 +35,7 @@
 <body>
     <!-- Top-level app wrapper for layout and JS hooks. -->
     <div class="container" data-app="ensayo-dias-sin-accidentes" data-purpose="safety-counter">
+        <div class="app-logo" id="devLogo" style="display:none;"></div>
         <header>
             <!-- Hidden app title for machine readability. -->
             <div class="app-identifier" data-title="Días sin accidentes" style="display: none;">
@@ -73,12 +74,12 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="previousRecordInput">Récord anterior (opcional):</label>
+                        <label for="previousRecordInput">Récord anterior:</label>
                         <input type="number" id="previousRecordInput" min="0" placeholder="Récord">
                     </div>
 
                     <div class="form-group">
-                        <label for="daysInput">Nuevo Valor de Días Sin Accidentes:</label>
+                        <label for="daysInput">Nuevo valor de días sin accidentes:</label>
                         <input type="number" id="daysInput" min="0" placeholder="Número de días">
                     </div>
                     

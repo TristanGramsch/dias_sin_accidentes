@@ -23,7 +23,12 @@ const DEFAULT_PASSWORD = 'jefecito';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || null;
 const DEV_PASSWORD = process.env.NODE_ENV !== 'production' ? (process.env.DEV_ADMIN_PASSWORD || 'dev') : null;
 
-const allowedPasswords = new Set([DEFAULT_PASSWORD]);
+// Build allowed password set. Default password remains enabled unless explicitly disabled.
+const allowedPasswords = new Set();
+// Add default unless disabled via env
+if (process.env.DISABLE_DEFAULT_PASSWORD !== '1') {
+    allowedPasswords.add(DEFAULT_PASSWORD);
+}
 if (ADMIN_PASSWORD) allowedPasswords.add(ADMIN_PASSWORD);
 if (DEV_PASSWORD) allowedPasswords.add(DEV_PASSWORD);
 
@@ -85,21 +90,38 @@ app.get('/api/counter', async (req, res) => {
 app.post('/api/counter/update', async (req, res) => {
     try {
         if (!requirePassword(req, res)) return;
-        const { dias } = req.body;
-        const newDays = parseInt(dias, 10);
-        if (isNaN(newDays) || newDays < 0) {
-            return res.status(400).json({ success: false, message: 'Por favor, ingrese un número válido de días' });
-        }
+
+        // Accept both fields as optional; validate each only if provided.
+        const diasRaw = req.body.dias;
+        const recordRaw = req.body.recordAnterior;
+
+        let providedAny = false;
 
         const data = await loadData();
         const oldDays = data.diasSinAccidentes;
-        data.diasSinAccidentes = newDays;
-        if (req.body.recordAnterior !== undefined) {
-            const recordVal = parseInt(req.body.recordAnterior, 10);
-            if (!Number.isNaN(recordVal) && recordVal >= 0) {
-                data.recordAnterior = recordVal;
+
+        if (diasRaw !== undefined) {
+            const newDays = parseInt(diasRaw, 10);
+            if (Number.isNaN(newDays) || newDays < 0) {
+                return res.status(400).json({ success: false, message: 'Por favor, ingrese un número válido de días' });
             }
+            data.diasSinAccidentes = newDays;
+            providedAny = true;
         }
+
+        if (recordRaw !== undefined) {
+            const recordVal = parseInt(recordRaw, 10);
+            if (Number.isNaN(recordVal) || recordVal < 0) {
+                return res.status(400).json({ success: false, message: 'Por favor, ingrese un número válido para el récord' });
+            }
+            data.recordAnterior = recordVal;
+            providedAny = true;
+        }
+
+        if (!providedAny) {
+            return res.status(400).json({ success: false, message: 'No se proporcionaron campos para actualizar' });
+        }
+
         data.ultimaActualizacion = new Date().toISOString();
         const { getChileTodayISODate } = require('../lib/time');
         data.lastRunChileDate = getChileTodayISODate();
@@ -107,8 +129,8 @@ app.post('/api/counter/update', async (req, res) => {
         const success = await saveData(data);
 
         if (success) {
-            appendUsage("admin_update", { path: "/api/counter/update", ip: req.ip || req.connection?.remoteAddress, oldDays, newDays, recordProvided: req.body.recordAnterior !== undefined });
-            res.json({ success: true, message: `Días actualizados de ${oldDays} a ${newDays}`, data: { diasSinAccidentes: data.diasSinAccidentes, ultimaActualizacion: data.ultimaActualizacion, ultimaActualizacionFormatted: formatChile(new Date(data.ultimaActualizacion)), recordAnterior: data.recordAnterior ?? null } });
+            appendUsage('admin_update', { path: '/api/counter/update', ip: req.ip || req.connection?.remoteAddress, oldDays, newDays: data.diasSinAccidentes, recordProvided: recordRaw !== undefined });
+            res.json({ success: true, message: 'Datos actualizados', data: { diasSinAccidentes: data.diasSinAccidentes, ultimaActualizacion: data.ultimaActualizacion, ultimaActualizacionFormatted: formatChile(new Date(data.ultimaActualizacion)), recordAnterior: data.recordAnterior ?? null } });
         } else {
             res.status(500).json({ success: false, message: 'Error al guardar los datos' });
         }

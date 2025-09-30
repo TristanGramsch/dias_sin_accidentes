@@ -159,30 +159,39 @@ async function updateDays() {
     if (!password) {
         return;
     }
-    
-    const newDays = parseInt(daysInput.value, 10);
-    
-    if (isNaN(newDays) || newDays < 0) {
+
+    // Allow either field to be optional: read and validate only if present
+    const daysRaw = daysInput.value.trim();
+    const previousRecordInput = document.getElementById('previousRecordInput');
+    const previousRecordRaw = previousRecordInput ? previousRecordInput.value.trim() : '';
+
+    const bodyDays = daysRaw === '' ? undefined : parseInt(daysRaw, 10);
+    if (bodyDays !== undefined && (Number.isNaN(bodyDays) || bodyDays < 0)) {
         showMessage('Por favor, ingrese un número válido de días', 'error');
         return;
     }
-    
+
+    const bodyRecord = previousRecordRaw === '' ? undefined : parseInt(previousRecordRaw, 10);
+    if (bodyRecord !== undefined && (Number.isNaN(bodyRecord) || bodyRecord < 0)) {
+        showMessage('Por favor, ingrese un número válido para el récord', 'error');
+        return;
+    }
+
+    if (bodyDays === undefined && bodyRecord === undefined) {
+        showMessage('Proporcione al menos un campo para actualizar', 'error');
+        return;
+    }
+
     // Shows a loading state while the request runs.
     updateBtn.textContent = 'Actualizando...';
     updateBtn.disabled = true;
-    
-    // include optional previous record if provided in admin panel
-    const previousRecordInput = document.getElementById('previousRecordInput');
-    const previousRecordValue = previousRecordInput && previousRecordInput.value.trim() !== ''
-        ? parseInt(previousRecordInput.value, 10)
-        : undefined;
 
-    const result = await updateDaysOnServer(password, newDays, previousRecordValue);
-    
+    const result = await updateDaysOnServer(password, bodyDays, bodyRecord);
+
     // Restores the button to its normal state.
     updateBtn.textContent = 'Actualizar';
     updateBtn.disabled = false;
-    
+
     if (result.success) {
         currentDays = result.data.diasSinAccidentes;
         updateDisplay();
@@ -321,6 +330,23 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Auto-refreshes every 5 minutes to check for daily increments.
     setInterval(loadData, 5 * 60 * 1000);
+
+    // Try to show a development logo if present at /logo/dev-logo.png
+    try {
+        const devLogoEl = document.getElementById('devLogo');
+        if (devLogoEl) {
+            fetch('/logo/dev-logo.png', { method: 'HEAD' }).then(resp => {
+                if (resp.ok) {
+                    devLogoEl.innerHTML = '<img src="/logo/dev-logo.png" alt="logo">';
+                    devLogoEl.style.display = 'block';
+                }
+            }).catch(() => {
+                // ignore; no logo available
+            });
+        }
+    } catch (e) {
+        // noop
+    }
 });
 
 // Refreshes data when the tab becomes visible to keep it current.
