@@ -1,3 +1,26 @@
+# dependencies and caches
+node_modules/
+**/.cache/
+**/.vite/
+**/.DS_Store
+
+# logs and tmp
+logs/
+*.log
+ddns-update.log
+backups/
+
+# data (runtime state)
+data/**/*.json
+data/*.bak.*
+*.bak.*
+
+# env files
+.env
+.env.*
+docker/.env*
+
+# certificates are intentionally tracked (do NOT ignore Certs/)
 # Node dependencies
 node_modules/
 
