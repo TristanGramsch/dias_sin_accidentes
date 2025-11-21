@@ -17,8 +17,8 @@ body {
 .container {
     background: white;
     border-radius: 20px;
-    /* extra top padding so the centered logo doesn't overlap the content */
-    padding: 170px 40px 40px;
+    /* comfortable general padding; logo will be in normal flow */
+    padding: 40px 40px 40px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     max-width: 500px;
     width: 100%;
@@ -26,23 +26,21 @@ body {
     position: relative;
 }
 
-/* Dev logo in the upper-left */
+/* Logo placed in normal flow above the title */
 .app-logo {
-    position: absolute;
-    top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 140px;
-    height: 140px;
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 12px 36px rgba(0,0,0,0.18);
-}
-.app-logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    position: relative;
     display: block;
+    margin: 8px auto 16px;
+}
+.app-logo:empty { display: none; }
+.app-logo img {
+    width: clamp(80px, 28vw, 160px);
+    height: auto;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+    border-radius: 14px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.18);
 }
 
 header h1 {
@@ -275,7 +273,7 @@ footer p {
 
 @media (max-width: 600px) {
     .container {
-        padding: 80px 20px 30px;
+        padding: 30px 20px;
     }
     
     header h1 {
@@ -295,9 +293,7 @@ footer p {
         width: 100%;
     }
 
-    .app-logo {
-        width: 56px;
-        height: 56px;
-        top: 12px;
+    .app-logo img {
+        width: clamp(72px, 40vw, 140px);
     }
 } 
