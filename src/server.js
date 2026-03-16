@@ -151,7 +151,7 @@ app.post('/api/counter/reset', async (req, res) => {
         const success = await saveData(data);
 
         if (success) {
-            appendUsage("admin_update", { path: "/api/counter/update", ip: req.ip || req.connection?.remoteAddress, oldDays, newDays, recordProvided: req.body.recordAnterior !== undefined });
+            appendUsage("admin_update", { path: "/api/counter/update", ip: req.ip || req.connection?.remoteAddress, oldDays, newDays: data.diasSinAccidentes, recordProvided: req.body.recordAnterior !== undefined });
             appendUsage("admin_reset", { path: "/api/counter/reset", ip: req.ip || req.connection?.remoteAddress, oldDays });
             res.json({ success: true, message: `Contador reiniciado desde ${oldDays} días`, data: { diasSinAccidentes: data.diasSinAccidentes, ultimaActualizacion: data.ultimaActualizacion, ultimaActualizacionFormatted: formatChile(new Date(data.ultimaActualizacion)) } });
         } else {

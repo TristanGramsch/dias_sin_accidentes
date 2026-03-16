@@ -331,14 +331,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Auto-refreshes every 5 minutes to check for daily increments.
     setInterval(loadData, 5 * 60 * 1000);
 
-    // Try to show a development logo if present at /logo/dev-logo.png
+    // Try to show Ecolab logo if present at /logo/ecolab-logo.png
     try {
-        const devLogoEl = document.getElementById('devLogo');
-        if (devLogoEl) {
-            fetch('/logo/dev-logo.png', { method: 'HEAD' }).then(resp => {
+        const logoEl = document.getElementById('devLogo');
+        if (logoEl) {
+            fetch('/logo/ecolab-logo.png', { method: 'HEAD' }).then(resp => {
                 if (resp.ok) {
-                    devLogoEl.innerHTML = '<img src="/logo/dev-logo.png" alt="logo">';
-                    devLogoEl.style.display = 'block';
+                    logoEl.innerHTML = '<img src="/logo/ecolab-logo.png" alt="Ecolab logo">';
+                    logoEl.style.display = 'block';
                 }
             }).catch(() => {
                 // ignore; no logo available

@@ -1,99 +1,70 @@
 #!/bin/bash
 
-# Días sin Accidentes Management Script
+# Días sin Accidentes - Ecolab Management Script
 # Usage: ./manage.sh [command]
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 show_help() {
-    echo "Días sin Accidentes Management Script"
+    echo "Días sin Accidentes - Ecolab Management Script"
     echo ""
     echo "Usage: $0 [command]"
     echo ""
     echo "Commands:"
-    echo "  status        - Show status of all services"
-    echo "  start         - Start all services"
-    echo "  stop          - Stop all services"
-    echo "  restart       - Restart all services"
-    echo "  logs [dev|prod] - Show logs for specific instance (or both if not specified)"
-    echo "  test          - Test local API endpoints"
-    echo "  backup        - Create manual backup of data files"
-    echo "  update-certs  - Update SSL certificates (restart required)"
+    echo "  status        - Show service status"
+    echo "  start         - Start the service"
+    echo "  stop          - Stop the service"
+    echo "  restart       - Restart the service"
+    echo "  logs          - Show service logs"
+    echo "  test          - Test local API endpoint"
+    echo "  backup        - Create backup of data file"
+    echo "  install       - Install systemd service and nginx config"
     echo "  help          - Show this help message"
     echo ""
-    echo "Public URLs:"
-    echo "  Production:  https://ensayo-dias-sin-accidentes.optoelectronica.cl"
-    echo "  Development: https://ensayo-ensayo-dias-sin-accidentes.optoelectronica.cl"
+    echo "Production URL:"
+    echo "  https://ecolab.optoelectronica.cl"
 }
 
 case "$1" in
     status)
         echo "=== Service Status ==="
-        sudo systemctl status dias-sin-accidentes-dev dias-sin-accidentes-prod nginx --no-pager -l
+        sudo systemctl status dias-sin-accidentes --no-pager -l
+        echo ""
+        echo "=== Nginx Status ==="
+        sudo systemctl status nginx --no-pager -l
         echo ""
         echo "=== Listening Ports ==="
-        sudo ss -tlnp | grep -E ':80|:443|:3001|:3002'
+        sudo ss -tlnp | grep -E ':3001|:80|:443'
         ;;
     
     start)
-        echo "Starting all services..."
-        sudo systemctl start dias-sin-accidentes-dev dias-sin-accidentes-prod nginx
-        echo "Services started. Use '$0 status' to check."
+        echo "Starting service..."
+        sudo systemctl start dias-sin-accidentes
+        echo "Service started. Use '$0 status' to check."
         ;;
     
     stop)
-        echo "Stopping all services..."
-        sudo systemctl stop dias-sin-accidentes-dev dias-sin-accidentes-prod
-        echo "Services stopped."
+        echo "Stopping service..."
+        sudo systemctl stop dias-sin-accidentes
+        echo "Service stopped."
         ;;
     
     restart)
-        echo "Restarting all services..."
-        sudo systemctl restart dias-sin-accidentes-dev dias-sin-accidentes-prod
+        echo "Restarting service..."
+        sudo systemctl restart dias-sin-accidentes
         sudo systemctl reload nginx
         echo "Services restarted."
         ;;
     
     logs)
-        case "$2" in
-            dev)
-                echo "=== Development Instance Logs ==="
-                sudo journalctl -u dias-sin-accidentes-dev -f
-                ;;
-            prod)
-                echo "=== Production Instance Logs ==="
-                sudo journalctl -u dias-sin-accidentes-prod -f
-                ;;
-            nginx)
-                echo "=== Nginx Logs ==="
-                sudo journalctl -u nginx -f
-                ;;
-            *)
-                echo "=== All Service Logs (last 20 lines each) ==="
-                echo "--- Development ---"
-                sudo journalctl -u dias-sin-accidentes-dev --no-pager -n 20
-                echo "--- Production ---"
-                sudo journalctl -u dias-sin-accidentes-prod --no-pager -n 20
-                echo "--- Nginx ---"
-                sudo journalctl -u nginx --no-pager -n 10
-                ;;
-        esac
+        echo "=== Service Logs (last 50 lines) ==="
+        sudo journalctl -u dias-sin-accidentes --no-pager -n 50
         ;;
     
     test)
-        echo "=== Testing Local API Endpoints ==="
-        echo "Development (port 3001):"
-        curl -s -k https://localhost:3001/api/counter | jq . 2>/dev/null || echo "  JSON parse error or jq not installed"
-        echo ""
-        echo "Production (port 3002):"
-        curl -s -k https://localhost:3002/api/counter | jq . 2>/dev/null || echo "  JSON parse error or jq not installed"
-        echo ""
-        echo "=== Testing Reverse Proxy (if DNS is configured) ==="
-        echo "Development via reverse proxy:"
-        curl -s -k https://ensayo-ensayo-dias-sin-accidentes.optoelectronica.cl/api/counter 2>/dev/null | head -c 100
-        echo ""
-        echo "Production via reverse proxy:"
-        curl -s -k https://ensayo-dias-sin-accidentes.optoelectronica.cl/api/counter 2>/dev/null | head -c 100
+        echo "=== Testing Local API Endpoint ==="
+        echo "Testing on port 3001:"
+        curl -s http://localhost:3001/api/counter | python3 -m json.tool 2>/dev/null || curl -s http://localhost:3001/api/counter
         echo ""
         ;;
     
@@ -103,19 +74,45 @@ case "$1" in
         mkdir -p "$BACKUP_DIR"
         
         echo "Creating backup in $BACKUP_DIR..."
-        cp "$SCRIPT_DIR/data/data.prod.json" "$BACKUP_DIR/" 2>/dev/null || echo "  Warning: data.prod.json not found"
-        cp "$SCRIPT_DIR/data/data.test.json" "$BACKUP_DIR/" 2>/dev/null || echo "  Warning: data.test.json not found"
         cp "$SCRIPT_DIR/data/data.json" "$BACKUP_DIR/" 2>/dev/null || echo "  Warning: data.json not found"
         
         echo "Backup completed: $BACKUP_DIR"
         ;;
     
-    update-certs)
-        echo "SSL Certificate files location: $SCRIPT_DIR/Certs/"
-        echo "Current certificates:"
-        ls -la "$SCRIPT_DIR/Certs/"
+    install)
+        echo "=== Installing Días sin Accidentes - Ecolab ==="
         echo ""
-        echo "After updating certificates, run: $0 restart"
+        
+        echo "1. Installing systemd service..."
+        sudo cp "$SCRIPT_DIR/systemd-services/dias-sin-accidentes.service" /etc/systemd/system/
+        sudo systemctl daemon-reload
+        sudo systemctl enable dias-sin-accidentes
+        echo "   ✓ Systemd service installed"
+        echo ""
+        
+        echo "2. Installing Nginx configuration..."
+        sudo cp "$SCRIPT_DIR/nginx-config/ecolab.optoelectronica.cl.conf" /etc/nginx/conf.d/
+        sudo /usr/sbin/nginx -t
+        if [ $? -eq 0 ]; then
+            sudo systemctl reload nginx
+            echo "   ✓ Nginx configuration installed"
+        else
+            echo "   ✗ Nginx configuration test failed!"
+            exit 1
+        fi
+        echo ""
+        
+        echo "3. Creating required directories..."
+        mkdir -p "$SCRIPT_DIR/logs"
+        echo "   ✓ Directories created"
+        echo ""
+        
+        echo "=== Installation Complete ==="
+        echo ""
+        echo "To start the service, run: $0 start"
+        echo "Or: sudo systemctl start dias-sin-accidentes"
+        echo ""
+        echo "Access the application at: https://ecolab.optoelectronica.cl"
         ;;
     
     help|--help|-h)

@@ -1,27 +1,20 @@
 {
-  "name": "ensayo-dias-sin-accidentes",
+  "name": "dias-sin-accidentes-ecolab",
   "version": "1.0.0",
-  "description": "Node.js application to track days without incidents - Docker ready for port 443 deployment",
-  "main": "server.js",
+  "description": "Node.js application to track days without incidents for Ecolab",
+  "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "docker:build": "docker build -f docker/Dockerfile -t dias-sin-accidentes:dev .",
-    "docker:run": "docker run -d --name dias-dev-counter -p 3001:4443 --env-file docker/.env.dev --restart unless-stopped dias-sin-accidentes:dev",
-    "docker:stop": "docker rm -f dias-dev-counter || true",
-    "docker:logs": "docker logs -f dias-dev-counter",
-    "docker:up": "npm run docker:build && npm run docker:run",
-    "docker:down": "npm run docker:stop"
+    "test:watch": "vitest"
   },
   "keywords": [
     "safety",
     "counter",
     "incidents",
     "workplace",
-    "docker",
-    "raspberry-pi"
+    "ecolab"
   ],
   "author": "Optoelectrónica Icalma",
   "license": "MIT",

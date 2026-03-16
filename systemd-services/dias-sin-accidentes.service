@@ -1,0 +1,23 @@
+[Unit]
+Description=Días Sin Accidentes - Ecolab
+After=network.target
+
+[Service]
+Type=simple
+User=tristangramsch
+Group=tristangramsch
+WorkingDirectory=/home/tristangramsch/dias_sin_accidentes
+Environment=NODE_ENV=production
+Environment=PORT=3001
+Environment=ADMIN_PASSWORD=ecolab321
+Environment=DATA_FILE_PATH=/home/tristangramsch/dias_sin_accidentes/data/data.json
+Environment=ALLOW_HTTP_IN_PRODUCTION=1
+ExecStart=/usr/bin/node src/server.js
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=dias-sin-accidentes
+
+[Install]
+WantedBy=multi-user.target
